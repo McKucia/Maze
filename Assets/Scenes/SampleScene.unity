@@ -517,11 +517,11 @@ MonoBehaviour:
   tileFloorPrefab: {fileID: 6351245391770879047, guid: 2f5c3b98b705bd643a853cf9c47f9753, type: 3}
   tileWallPrefab: {fileID: 1953077224627339679, guid: d2ee0fd4090565244894667b5adbe6b4, type: 3}
   tileConnectorPrefab: {fileID: 1953077224627339679, guid: 8da661e28c9259b4d81784ab9e358f98, type: 3}
-  _numRoomTries: 2
+  _numRoomTries: 1
   _roomsPadding: 1
   _roomExtraSize: 0
   windingPercent: 60
-  _gridSize: {x: 40, y: 40}
+  _gridSize: {x: 20, y: 20}
 --- !u!4 &1986907394
 Transform:
   m_ObjectHideFlags: 0
