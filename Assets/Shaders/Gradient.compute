@@ -1,0 +1,61 @@
+#pragma kernel GaussBlur
+#pragma kernel Sobel
+
+Texture2D<float4> source;
+RWTexture2D<float4> gaussOutput;
+shared RWTexture2D<float4> sobelOutput;
+
+RWStructuredBuffer<float> gaussWeightsBuffer;
+
+static float PI = 3.14159265;
+
+float3 sobel(int x, int y)
+{
+    float3 Gx =-1 * source[uint2(x - 1, y + 1)].rgb +
+               -2 * source[uint2(x - 1, y)].rgb +
+               -1 * source[uint2(x - 1, y - 1)].rgb +
+
+                1 * source[uint2(x + 1, y + 1)].rgb +
+                2 * source[uint2(x + 1, y)].rgb +
+                1 * source[uint2(x + 1, y - 1)].rgb;
+
+    float3 Gy = 1 * source[uint2(x - 1, y + 1)].rgb +
+                2 * source[uint2(x, y + 1)].rgb +
+                1 * source[uint2(x + 1, y + 1)].rgb +
+    
+               -1 * source[uint2(x - 1, y - 1)].rgb +
+               -2 * source[uint2(x, y - 1)].rgb +
+               -1 * source[uint2(x + 1, y - 1)].rgb;
+    
+    return float3(dot(Gx, Gx), dot(Gy, Gy), dot(Gx, Gy));
+}
+
+float GetGaussWeight(float sigma, float posX, float posY)
+{
+    return (1.0 / sqrt(2.0 * PI * sigma * sigma)) * exp(-(posX * posX + posY * posY) / (2.0 * sigma * sigma));
+}
+
+[numthreads(8, 8, 1)]
+void GaussBlur(uint3 id : SV_DispatchThreadID)
+{
+    float sigma = 2.0;
+    int halfWidth = ceil(2 * sigma);
+    float3 currentPixel = float3(0.0, 0.0, 0.0);
+    
+    uint2 index = uint2(clamp(id.x, halfWidth, sobelOutput.Length.x - halfWidth), clamp(id.y, halfWidth, sobelOutput.Length.y - halfWidth));
+    
+    int counter = 0;
+    for (int x = -halfWidth; x <= halfWidth; x++)
+        for (int y = -halfWidth; y <= halfWidth; y++)
+            currentPixel += sobelOutput[uint2(index.x + x, index.y + y)].rgb * gaussWeightsBuffer[counter++];
+    
+    gaussOutput[id.xy] = float4(currentPixel, 0);
+}
+
+[numthreads(8, 8, 1)]
+void Sobel(uint3 id : SV_DispatchThreadID)
+{
+    uint2 index = uint2(clamp(id.x, 1, source.Length.x - 2), clamp(id.y, 1, source.Length.y - 2));    
+    
+    sobelOutput[id.xy] = float4(sobel(index.x, index.y), 0);
+}

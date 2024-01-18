@@ -5,16 +5,35 @@ using UnityEngine;
 public class MazeGenerator : MonoBehaviour
 {
     [SerializeField] bool _generate;
-    [SerializeField] bool _isCircle;
+    [SerializeField] bool _isCircle = false;
     [SerializeField] GameObject tileRoomPrefab;
     [SerializeField] GameObject tileFloorPrefab;
     [SerializeField] GameObject tileWallPrefab;
-    [SerializeField] GameObject tileConnectorPrefab;
-    [SerializeField] int _numRoomTries = 40;
-    [SerializeField] int _roomsPadding = 1;
-    [SerializeField] int _roomExtraSize = 0;
-    [SerializeField] int windingPercent = 50;
-    [SerializeField] Vector2Int _gridSize = new Vector2Int(15, 15);
+    [SerializeField] GameObject tileBorderPrefab;
+
+    [SerializeField]
+    [Range(0, 3)]
+    int _roomsPadding = 1;
+
+    [SerializeField]
+    [Range(0, 3)] 
+    int _roomExtraSize = 0;
+
+    [SerializeField]
+    [Range(0, 100)] 
+    int windingPercent = 60;
+
+    [SerializeField]
+    [Range(0, 250)]
+    int _numRoomTries = 50;
+
+    [SerializeField]
+    [Range(21, 81)]
+    int _gridSizeX = 41;
+
+    [SerializeField]
+    [Range(21, 81)]
+    int _gridSizeY = 41;
 
     List<Object> tileGameObjects;
     List<Room> _rooms;
@@ -26,7 +45,7 @@ public class MazeGenerator : MonoBehaviour
 
     void Start()
     {
-        _grid = new Grid(_gridSize, _isCircle);
+        _grid = new Grid(new Vector2Int(_gridSizeX, _gridSizeY), _isCircle);
 
         _rooms = new List<Room>();
         tileGameObjects = new List<Object>();
@@ -47,6 +66,9 @@ public class MazeGenerator : MonoBehaviour
             _generate = _generateCheck;
             Generate();
         }
+
+        if (_gridSizeX % 2 == 0) _gridSizeX++;
+        if (_gridSizeY % 2 == 0) _gridSizeY++;
     }
 
     void Generate()
@@ -55,7 +77,7 @@ public class MazeGenerator : MonoBehaviour
         tileGameObjects.ForEach(t => Destroy(t));
         tileGameObjects.Clear();
         _rooms.Clear();
-        _grid.Reset();
+        _grid.Reset(new Vector2Int(_gridSizeX, _gridSizeY));
 
         AddRooms();
 
@@ -81,8 +103,8 @@ public class MazeGenerator : MonoBehaviour
             int sizeX = Random.Range(1, 3 + _roomExtraSize) * 2 + 1;
             int sizeY = Random.Range(1, 3 + _roomExtraSize) * 2 + 1;
 
-            int x = (Random.Range(0, _gridSize.x - sizeX) / 2) * 2 + 1;
-            int y = (Random.Range(0, _gridSize.y - sizeY) / 2) * 2 + 1;
+            int x = (Random.Range(0, _gridSizeX - sizeX) / 2) * 2 + 1;
+            int y = (Random.Range(0, _gridSizeY - sizeY) / 2) * 2 + 1;
 
             Room room = new Room(new Vector2Int(sizeX, sizeY), new Vector2Int(x, y));
 
@@ -125,6 +147,9 @@ public class MazeGenerator : MonoBehaviour
                 break;
             case Tile.TileType.Floor:
                 newTile = Instantiate(tileFloorPrefab, new Vector3(tile.Position.x, 0, tile.Position.y), Quaternion.identity);
+                break;
+            case Tile.TileType.Border:
+                newTile = Instantiate(tileBorderPrefab, new Vector3(tile.Position.x, .5f, tile.Position.y), Quaternion.identity);
                 break;
         }
 

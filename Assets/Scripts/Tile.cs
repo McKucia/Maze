@@ -8,7 +8,8 @@ public class Tile : MonoBehaviour
         Floor,
         Room,
         Wall,
-        Nothing
+        Nothing,
+        Border
     }
 
     public TileType Type;

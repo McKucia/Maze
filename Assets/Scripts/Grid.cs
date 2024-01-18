@@ -26,19 +26,24 @@ public struct Grid
         Vector2Int centerPoint = new Vector2Int(Size.x / 2, Size.y / 2);
         int circleRadius = Mathf.Min(Size.x / 2, Size.y / 2);
 
-        for (int x = centerPoint.x - circleRadius; x < centerPoint.x + circleRadius; x++)
-            for (int y = centerPoint.y - circleRadius; y < centerPoint.y + circleRadius; y++)
+        for (int x = centerPoint.x - circleRadius; x <= centerPoint.x + circleRadius; x++)
+            for (int y = centerPoint.y - circleRadius; y <= centerPoint.y + circleRadius; y++)
             {
-                if ((x - circleRadius) * (x - circleRadius) + (y - circleRadius) * (y - circleRadius) < circleRadius * circleRadius)
+                int distance = (x - circleRadius) * (x - circleRadius) + (y - circleRadius) * (y - circleRadius);
+
+                if(distance >= circleRadius * circleRadius && distance <= (circleRadius * circleRadius + circleRadius * 2))
+                    Tiles[x, y] = new Tile(null, new Vector2Int(x, y), Tile.TileType.Border);
+                else if (distance < circleRadius * circleRadius)
                     Tiles[x, y] = new Tile(null, new Vector2Int(x, y), Tile.TileType.Wall);
                 else
                     Tiles[x, y] = new Tile(null, new Vector2Int(x, y), Tile.TileType.Nothing);
             }
     }
 
-    public void Reset()
+    public void Reset(Vector2Int size)
     {
-        Array.Clear(Tiles, 0, Tiles.Length);
+        Size = size;
+        Tiles = new Tile[Size.x, Size.y];
         if (_isCircle) InitCircle();
         else InitSquare();
     }
