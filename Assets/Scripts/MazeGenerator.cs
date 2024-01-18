@@ -26,7 +26,7 @@ public class MazeGenerator : MonoBehaviour
 
     void Start()
     {
-        _grid = new Grid(_gridSize, true);
+        _grid = new Grid(_gridSize, _isCircle);
 
         _rooms = new List<Room>();
         tileGameObjects = new List<Object>();
@@ -67,6 +67,7 @@ public class MazeGenerator : MonoBehaviour
                 GrowMaze(tile);
             }
 
+        
         ConnectRegions();
 
         foreach (var t in _grid.Tiles)
@@ -166,7 +167,7 @@ public class MazeGenerator : MonoBehaviour
             else
             {
                 // No adjacent uncarved tiles
-                tiles.Remove(tile);
+                tiles.RemoveAt(tiles.Count - 1);
             
                 // This path has ended.
                 lastDirection = new Vector2Int(0, 0);
@@ -203,7 +204,11 @@ public class MazeGenerator : MonoBehaviour
                 connectors.Add(tile);
             }
 
-        //connectors.ForEach(c => Instantiate(tileConnectorPrefab, new Vector3(c.Position.x, 0, c.Position.y), Quaternion.identity));
+        //foreach(var c in connectors)
+        //{
+        //    var con = Instantiate(tileConnectorPrefab, new Vector3(c.Position.x, 2f, c.Position.y), Quaternion.identity);
+        //    tileGameObjects.Add(con);
+        //}
 
         var merged = new int[_currentRegion + 1];
         var openRegions = new List<int>();
@@ -217,20 +222,20 @@ public class MazeGenerator : MonoBehaviour
         {
             var connector = connectors[Random.Range(0, connectors.Count)];
             _grid.Carve(connector, connector.RegionId);
-
+        
             var regions = connector.ConnectorRegions.Select(r => merged[r]).ToList();
             var dest = regions.First();
             var sources = regions.Skip(1).ToList();
-
+        
             for (int i = 0; i <= _currentRegion; i++)
                 if (sources.Contains(merged[i]))
                     merged[i] = dest;
-
+        
             openRegions.RemoveAll(r => sources.Contains(r));
-
+        
             connectors.RemoveAll(c =>
-                (connector.IsClose(c, 3)) // ||
-                //(c.ConnectorRegions.Select(r => merged[r]).Count() >= 1)
+                (connector.IsClose(c, 3)) ||
+                (c.ConnectorRegions.Select(r => merged[r]).Count() <= 1)
             );
         };
     }

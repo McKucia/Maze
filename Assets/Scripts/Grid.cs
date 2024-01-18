@@ -29,7 +29,7 @@ public struct Grid
         for (int x = centerPoint.x - circleRadius; x < centerPoint.x + circleRadius; x++)
             for (int y = centerPoint.y - circleRadius; y < centerPoint.y + circleRadius; y++)
             {
-                if ((x - circleRadius) * (x - circleRadius) + (y - circleRadius) * (y - circleRadius) <= circleRadius * circleRadius)
+                if ((x - circleRadius) * (x - circleRadius) + (y - circleRadius) * (y - circleRadius) < circleRadius * circleRadius)
                     Tiles[x, y] = new Tile(null, new Vector2Int(x, y), Tile.TileType.Wall);
                 else
                     Tiles[x, y] = new Tile(null, new Vector2Int(x, y), Tile.TileType.Nothing);
