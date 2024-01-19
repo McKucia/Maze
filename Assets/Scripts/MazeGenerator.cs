@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class MazeGenerator : MonoBehaviour
@@ -24,7 +26,7 @@ public class MazeGenerator : MonoBehaviour
     int windingPercent = 60;
 
     [SerializeField]
-    [Range(0, 250)]
+    [Range(0, 100000)]
     int _numRoomTries = 50;
 
     [SerializeField]
@@ -35,20 +37,22 @@ public class MazeGenerator : MonoBehaviour
     [Range(21, 81)]
     int _gridSizeY = 41;
 
-    List<Object> tileGameObjects;
+    List<GameObject> tileGameObjects;
     List<Room> _rooms;
     List<Vector2Int> _directions;
     Grid _grid;
     bool _generateCheck = false;
     /// The index of the current region being carved.
     int _currentRegion = -1;
+    System.Random _random;
 
     void Start()
     {
+        _random = new System.Random();
         _grid = new Grid(new Vector2Int(_gridSizeX, _gridSizeY), _isCircle);
 
         _rooms = new List<Room>();
-        tileGameObjects = new List<Object>();
+        tileGameObjects = new List<GameObject>();
         _directions = new List<Vector2Int>()
             {
                 new Vector2Int(0, 1),  // up
@@ -71,52 +75,60 @@ public class MazeGenerator : MonoBehaviour
         if (_gridSizeY % 2 == 0) _gridSizeY++;
     }
 
-    void Generate()
+    async void Generate()
     {
-        _currentRegion = -1;
         tileGameObjects.ForEach(t => Destroy(t));
-        tileGameObjects.Clear();
-        _rooms.Clear();
-        _grid.Reset(new Vector2Int(_gridSizeX, _gridSizeY));
 
-        AddRooms();
+        await Task.Run(() =>
+        {
+            ResetGenerator();
+            _grid.Reset(new Vector2Int(_gridSizeX, _gridSizeY));
+            AddRooms();
 
-        for (int y = 1; y < _grid.Size.y; y += 2)
-            for (int x = 1; x < _grid.Size.x; x += 2)
-            {
-                var tile = _grid.Tiles[x, y];
-                if (tile.Type != Tile.TileType.Wall) continue;
-                GrowMaze(tile);
-            }
-
-        
-        ConnectRegions();
+            for (int y = 1; y < _grid.Size.y; y += 2)
+                for (int x = 1; x < _grid.Size.x; x += 2)
+                {
+                    var tile = _grid.Tiles[x, y];
+                    if (tile.Type != Tile.TileType.Wall) continue;
+                    GrowMaze(tile);
+                }
+            
+            
+            ConnectRegions();
+        });
 
         foreach (var t in _grid.Tiles)
             SpawnTile(t);
+    }
+
+    void ResetGenerator()
+    {
+        _currentRegion = -1;
+        tileGameObjects.Clear();
+        _rooms.Clear();
     }
 
     void AddRooms()
     {
         for (int i = 0; i < _numRoomTries; i++)
         {
-            int sizeX = Random.Range(1, 3 + _roomExtraSize) * 2 + 1;
-            int sizeY = Random.Range(1, 3 + _roomExtraSize) * 2 + 1;
+            int sizeX = _random.Next(1, 3 + _roomExtraSize) * 2 + 1;
+            int sizeY = _random.Next(1, 3 + _roomExtraSize) * 2 + 1;
 
-            int x = (Random.Range(0, _gridSizeX - sizeX) / 2) * 2 + 1;
-            int y = (Random.Range(0, _gridSizeY - sizeY) / 2) * 2 + 1;
+            int x = (_random.Next(0, _gridSizeX - sizeX) / 2) * 2 + 1;
+            int y = (_random.Next(0, _gridSizeY - sizeY) / 2) * 2 + 1;
 
             Room room = new Room(new Vector2Int(sizeX, sizeY), new Vector2Int(x, y));
 
             bool overlaps = _rooms.Any(r => r.Overlaps(room, _roomsPadding));
 
-            if (overlaps || !SpawnRoom(room)) continue;
+            if (overlaps || !CarveRoom(room)) continue;
 
             _rooms.Add(room);
         }
     }
 
-    bool SpawnRoom(Room room)
+    bool CarveRoom(Room room)
     {
         var tilesToCarve = new List<Tile>();
 
@@ -178,10 +190,10 @@ public class MazeGenerator : MonoBehaviour
             if (unmadeTilesDirections.Count > 0)
             {
                 Vector2Int direction;
-                if (unmadeTilesDirections.Contains(lastDirection) && Random.Range(0, 100) > windingPercent)
+                if (unmadeTilesDirections.Contains(lastDirection) && _random.Next(0, 100) > windingPercent)
                     direction = lastDirection;
                 else
-                    direction = unmadeTilesDirections[Random.Range(0, unmadeTilesDirections.Count)];
+                    direction = unmadeTilesDirections[_random.Next(0, unmadeTilesDirections.Count)];
 
                 _grid.Carve(_grid.GetNextTile(tile, direction, 1), _currentRegion);
                 _grid.Carve(_grid.GetNextTile(tile, direction, 2), _currentRegion);
@@ -245,7 +257,7 @@ public class MazeGenerator : MonoBehaviour
 
         while (openRegions.Count > 0)
         {
-            var connector = connectors[Random.Range(0, connectors.Count)];
+            var connector = connectors[_random.Next(0, connectors.Count)];
             _grid.Carve(connector, connector.RegionId);
         
             var regions = connector.ConnectorRegions.Select(r => merged[r]).ToList();
