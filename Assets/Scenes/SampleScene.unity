@@ -860,7 +860,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1986907394}
-  - component: {fileID: 1986907393}
+  - component: {fileID: 1986907395}
   m_Layer: 0
   m_Name: MazeGenerator
   m_TagString: Untagged
@@ -868,30 +868,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1986907393
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1986907392}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 014b4922bd8e2df4fb019606991ab755, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _generate: 0
-  _isCircle: 1
-  tileRoomPrefab: {fileID: 6351245391770879047, guid: cb8f1876669cba74abfcde78d17f6a47, type: 3}
-  tileFloorPrefab: {fileID: 6351245391770879047, guid: 2f5c3b98b705bd643a853cf9c47f9753, type: 3}
-  tileWallPrefab: {fileID: 1953077224627339679, guid: d2ee0fd4090565244894667b5adbe6b4, type: 3}
-  tileBorderPrefab: {fileID: 1953077224627339679, guid: 5d550660ba81f0443be706b959b3b432, type: 3}
-  _roomsPadding: 1
-  _roomExtraSize: 0
-  windingPercent: 60
-  _numRoomTries: 8861
-  _gridSizeX: 41
-  _gridSizeY: 41
 --- !u!4 &1986907394
 Transform:
   m_ObjectHideFlags: 0
@@ -907,6 +883,31 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1986907395
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1986907392}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb7c5b08aaf424447bbb1d9230e78ac7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _numLevels: 1
+  _generate: 0
+  isCircle: 1
+  tileRoomPrefab: {fileID: 6351245391770879047, guid: cb8f1876669cba74abfcde78d17f6a47, type: 3}
+  tileFloorPrefab: {fileID: 6351245391770879047, guid: 2f5c3b98b705bd643a853cf9c47f9753, type: 3}
+  tileWallPrefab: {fileID: 1953077224627339679, guid: d2ee0fd4090565244894667b5adbe6b4, type: 3}
+  tileBorderPrefab: {fileID: 1953077224627339679, guid: 5d550660ba81f0443be706b959b3b432, type: 3}
+  roomsPadding: 1
+  roomExtraSize: 0
+  windingPercent: 60
+  numRoomTries: 50
+  gridSizeX: 41
+  gridSizeY: 41
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

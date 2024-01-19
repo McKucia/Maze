@@ -40,8 +40,9 @@ public struct Grid
             }
     }
 
-    public void Reset(Vector2Int size)
+    public void Reset(Vector2Int size, bool isCircle)
     {
+        _isCircle = isCircle;
         Size = size;
         Tiles = new Tile[Size.x, Size.y];
         if (_isCircle) InitCircle();

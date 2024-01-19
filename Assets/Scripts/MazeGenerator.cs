@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,50 +5,21 @@ using UnityEngine;
 
 public class MazeGenerator : MonoBehaviour
 {
-    [SerializeField] bool _generate;
-    [SerializeField] bool _isCircle = false;
-    [SerializeField] GameObject tileRoomPrefab;
-    [SerializeField] GameObject tileFloorPrefab;
-    [SerializeField] GameObject tileWallPrefab;
-    [SerializeField] GameObject tileBorderPrefab;
-
-    [SerializeField]
-    [Range(0, 3)]
-    int _roomsPadding = 1;
-
-    [SerializeField]
-    [Range(0, 3)] 
-    int _roomExtraSize = 0;
-
-    [SerializeField]
-    [Range(0, 100)] 
-    int windingPercent = 60;
-
-    [SerializeField]
-    [Range(0, 100000)]
-    int _numRoomTries = 50;
-
-    [SerializeField]
-    [Range(21, 81)]
-    int _gridSizeX = 41;
-
-    [SerializeField]
-    [Range(21, 81)]
-    int _gridSizeY = 41;
-
+    readonly MazeGeneratorManager _manager = MazeGeneratorManager.Instance;
     List<GameObject> tileGameObjects;
     List<Room> _rooms;
     List<Vector2Int> _directions;
     Grid _grid;
-    bool _generateCheck = false;
     /// The index of the current region being carved.
     int _currentRegion = -1;
+    int _level;
     System.Random _random;
 
-    void Start()
+    public MazeGenerator(int level)
     {
+        _level = level;
         _random = new System.Random();
-        _grid = new Grid(new Vector2Int(_gridSizeX, _gridSizeY), _isCircle);
+        _grid = new Grid(new Vector2Int(_manager.gridSizeX, _manager.gridSizeY), _manager.isCircle);
 
         _rooms = new List<Room>();
         tileGameObjects = new List<GameObject>();
@@ -60,29 +30,19 @@ public class MazeGenerator : MonoBehaviour
                 new Vector2Int(0, -1), // down
                 new Vector2Int(-1, 0)  // left
             };
+
         Generate();
     }
 
-    private void OnValidate()
-    {
-        if (_generateCheck != _generate)
-        {
-            _generate = _generateCheck;
-            Generate();
-        }
-
-        if (_gridSizeX % 2 == 0) _gridSizeX++;
-        if (_gridSizeY % 2 == 0) _gridSizeY++;
-    }
-
-    async void Generate()
+    public async void Generate()
     {
         tileGameObjects.ForEach(t => Destroy(t));
 
         await Task.Run(() =>
         {
             ResetGenerator();
-            _grid.Reset(new Vector2Int(_gridSizeX, _gridSizeY));
+            _grid.Reset(new Vector2Int(_manager.gridSizeX, _manager.gridSizeY), _manager.isCircle);
+
             AddRooms();
 
             for (int y = 1; y < _grid.Size.y; y += 2)
@@ -92,7 +52,6 @@ public class MazeGenerator : MonoBehaviour
                     if (tile.Type != Tile.TileType.Wall) continue;
                     GrowMaze(tile);
                 }
-            
             
             ConnectRegions();
         });
@@ -110,17 +69,17 @@ public class MazeGenerator : MonoBehaviour
 
     void AddRooms()
     {
-        for (int i = 0; i < _numRoomTries; i++)
+        for (int i = 0; i < _manager.numRoomTries; i++)
         {
-            int sizeX = _random.Next(1, 3 + _roomExtraSize) * 2 + 1;
-            int sizeY = _random.Next(1, 3 + _roomExtraSize) * 2 + 1;
+            int sizeX = _random.Next(1, 3 + _manager.roomExtraSize) * 2 + 1;
+            int sizeY = _random.Next(1, 3 + _manager.roomExtraSize) * 2 + 1;
 
-            int x = (_random.Next(0, _gridSizeX - sizeX) / 2) * 2 + 1;
-            int y = (_random.Next(0, _gridSizeY - sizeY) / 2) * 2 + 1;
+            int x = (_random.Next(0, _manager.gridSizeX - sizeX) / 2) * 2 + 1;
+            int y = (_random.Next(0, _manager.gridSizeY - sizeY) / 2) * 2 + 1;
 
             Room room = new Room(new Vector2Int(sizeX, sizeY), new Vector2Int(x, y));
 
-            bool overlaps = _rooms.Any(r => r.Overlaps(room, _roomsPadding));
+            bool overlaps = _rooms.Any(r => r.Overlaps(room, _manager.roomsPadding));
 
             if (overlaps || !CarveRoom(room)) continue;
 
@@ -152,16 +111,16 @@ public class MazeGenerator : MonoBehaviour
         switch (tile.Type)
         {
             case Tile.TileType.Room:
-                newTile = Instantiate(tileRoomPrefab, new Vector3(tile.Position.x, 0, tile.Position.y), Quaternion.identity);
+                newTile = Instantiate(_manager.tileRoomPrefab, new Vector3(tile.Position.x, -_level * 2, tile.Position.y), Quaternion.identity);
                 break;
             case Tile.TileType.Wall:
-                newTile = Instantiate(tileWallPrefab, new Vector3(tile.Position.x, .5f, tile.Position.y), Quaternion.identity);
+                newTile = Instantiate(_manager.tileWallPrefab, new Vector3(tile.Position.x, -_level * 2 + .5f, tile.Position.y), Quaternion.identity);
                 break;
             case Tile.TileType.Floor:
-                newTile = Instantiate(tileFloorPrefab, new Vector3(tile.Position.x, 0, tile.Position.y), Quaternion.identity);
+                newTile = Instantiate(_manager.tileFloorPrefab, new Vector3(tile.Position.x, -_level * 2, tile.Position.y), Quaternion.identity);
                 break;
             case Tile.TileType.Border:
-                newTile = Instantiate(tileBorderPrefab, new Vector3(tile.Position.x, .5f, tile.Position.y), Quaternion.identity);
+                newTile = Instantiate(_manager.tileBorderPrefab, new Vector3(tile.Position.x, -_level * 2 + .5f, tile.Position.y), Quaternion.identity);
                 break;
         }
 
@@ -190,7 +149,7 @@ public class MazeGenerator : MonoBehaviour
             if (unmadeTilesDirections.Count > 0)
             {
                 Vector2Int direction;
-                if (unmadeTilesDirections.Contains(lastDirection) && _random.Next(0, 100) > windingPercent)
+                if (unmadeTilesDirections.Contains(lastDirection) && _random.Next(0, 100) > _manager.windingPercent)
                     direction = lastDirection;
                 else
                     direction = unmadeTilesDirections[_random.Next(0, unmadeTilesDirections.Count)];
