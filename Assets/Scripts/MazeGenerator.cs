@@ -139,7 +139,7 @@ public class MazeGenerator : MonoBehaviour
                 newTile = Instantiate(_manager.tileBorderPrefab, new Vector3(tile.Position.x, -_level * 2 + .5f, tile.Position.y), Quaternion.identity);
                 break;
             case Tile.TileType.Carpet:
-                newTile = Instantiate(_manager.tileCarpetPrefab, new Vector3(tile.Position.x, -_level * 2 + .5f, tile.Position.y), Quaternion.identity);
+                newTile = Instantiate(_manager.tileCarpetPrefab, new Vector3(tile.Position.x, -_level * 2, tile.Position.y), Quaternion.identity);
                 break;
         }
 

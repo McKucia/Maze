@@ -107,7 +107,7 @@ public struct Grid
     {
         var bounds = GetBounds(fromTile, direction, multiplier);
 
-        if (bounds.x >= Size.x || bounds.x <= 0 || bounds.y >= Size.y || bounds.y <= 0)
+        if (bounds.x > Size.x || bounds.x < 0 || bounds.y > Size.y || bounds.y < 0)
             return false;
 
         if (Tiles[bounds.x, bounds.y].Type == type)
