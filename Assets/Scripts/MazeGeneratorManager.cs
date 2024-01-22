@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,11 +14,14 @@ public class MazeGeneratorManager : MonoBehaviour
     bool _generate;
 
     public bool isCircle = false;
+    public GameObject virtualCamera;
     public GameObject tileRoomPrefab;
     public GameObject tileFloorPrefab;
     public GameObject tileWallPrefab;
     public GameObject tileBorderPrefab;
     public GameObject tileCarpetPrefab;
+    public GameObject playerPrefab;
+    [HideInInspector] public int _currentLevel = 0;
 
     [Range(0, 3)]   public int roomsPadding = 1;
     [Range(0, 3)]   public int roomExtraSize = 0;
@@ -26,17 +30,7 @@ public class MazeGeneratorManager : MonoBehaviour
     [Range(21, 81)] public int gridSizeX = 41;
     [Range(21, 81)] public int gridSizeY = 41;
 
-    [HideInInspector]
-    public List<Vector2Int> directions = new List<Vector2Int>()
-        {
-            new Vector2Int(0, 1),  // up
-            new Vector2Int(1, 0),  // right
-            new Vector2Int(0, -1), // down
-            new Vector2Int(-1, 0)  // left
-        };
-
-    List<MazeGenerator> _generators;
-    int _currentLevel = 0;
+    MazeGenerator[] _generators;
     bool _generateCheck = false;
 
     private void Awake()
@@ -49,12 +43,13 @@ public class MazeGeneratorManager : MonoBehaviour
 
     void Start()
     {
-        _generators = new List<MazeGenerator>();
+        _generators = new MazeGenerator[_numLevels];
 
-        while (_currentLevel++ < _numLevels)
+        int level = 0;
+        while (level < _numLevels)
         {
-            MazeGenerator generator = new MazeGenerator(_currentLevel);
-            _generators.Add(generator);
+            MazeGenerator generator = new MazeGenerator(level);
+            _generators[level++] = generator;
         }
     }
 
@@ -66,7 +61,14 @@ public class MazeGeneratorManager : MonoBehaviour
         if (_generateCheck != _generate)
         {
             _generate = _generateCheck;
-            _generators.ForEach(g => g.Generate());
+
+            foreach (var generator in _generators)
+                generator.Generate();
         }
+    }
+
+    public Grid GetCurrentGrid()
+    {
+        return _generators[_currentLevel].Grid;
     }
 }

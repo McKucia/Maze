@@ -1,20 +1,19 @@
-using System;
-using UnityEditor;
+using System.Collections.Generic;
 using UnityEngine;
 
 public struct Grid
 {
     public Vector2Int Size;
     public Tile[,] Tiles;
+    public bool IsReady;
     bool _isCircle;
-    readonly MazeGeneratorManager _manager;
 
     public Grid(Vector2Int size, bool isCircle = false)
     {
         Size = size;
         Tiles = new Tile[Size.x, Size.y];
         _isCircle = isCircle;
-        _manager = MazeGeneratorManager.Instance;
+        IsReady = false;
     }
 
     void InitSquare()
@@ -45,6 +44,7 @@ public struct Grid
 
     public void Reset(Vector2Int size, bool isCircle)
     {
+        IsReady = false;
         _isCircle = isCircle;
         Size = size;
         Tiles = new Tile[Size.x, Size.y];
@@ -120,7 +120,7 @@ public struct Grid
     {
         int total = 0;
 
-        foreach (var direction in _manager.directions)
+        foreach (var direction in HelperClass.Directions)
         {
             if (!CheckNextTileType(tile, direction, 1, Tile.TileType.Floor))
                 continue;
