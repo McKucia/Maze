@@ -8,7 +8,6 @@ public class MazeGenerator : MonoBehaviour
     readonly MazeGeneratorManager _manager = MazeGeneratorManager.Instance;
     List<GameObject> tileGameObjects;
     List<Room> _rooms;
-    List<Vector2Int> _directions;
     Grid _grid;
     /// The index of the current region being carved.
     int _currentRegion = -1;
@@ -23,13 +22,6 @@ public class MazeGenerator : MonoBehaviour
 
         _rooms = new List<Room>();
         tileGameObjects = new List<GameObject>();
-        _directions = new List<Vector2Int>()
-            {
-                new Vector2Int(0, 1),  // up
-                new Vector2Int(1, 0),  // right
-                new Vector2Int(0, -1), // down
-                new Vector2Int(-1, 0)  // left
-            };
 
         Generate();
     }
@@ -54,6 +46,7 @@ public class MazeGenerator : MonoBehaviour
                 }
             
             ConnectRegions();
+            AddCarpets();
         });
 
         foreach (var t in _grid.Tiles)
@@ -122,6 +115,9 @@ public class MazeGenerator : MonoBehaviour
             case Tile.TileType.Border:
                 newTile = Instantiate(_manager.tileBorderPrefab, new Vector3(tile.Position.x, -_level * 2 + .5f, tile.Position.y), Quaternion.identity);
                 break;
+            case Tile.TileType.Carpet:
+                newTile = Instantiate(_manager.tileCarpetPrefab, new Vector3(tile.Position.x, -_level * 2 + .5f, tile.Position.y), Quaternion.identity);
+                break;
         }
 
         if(newTile != null)
@@ -142,7 +138,7 @@ public class MazeGenerator : MonoBehaviour
             Tile tile = tiles.Last();
             var unmadeTilesDirections = new List<Vector2Int>();
 
-            foreach (var direction in _directions)
+            foreach (var direction in _manager.directions)
                 if (_grid.CanCarve(tile, direction))
                     unmadeTilesDirections.Add(direction);
 
@@ -171,6 +167,17 @@ public class MazeGenerator : MonoBehaviour
         }
     }
 
+    void AddCarpets()
+    {
+        foreach(var tile in _grid.Tiles)
+        {
+            if(tile.Type != Tile.TileType.Floor) continue;
+
+            if (_grid.GetNeighboursNumber(tile) > 2)
+                _grid.SetTileType(tile, Tile.TileType.Carpet);
+        }
+    }
+
     void ConnectRegions()
     {
         var connectors = new List<Tile>();
@@ -184,7 +191,7 @@ public class MazeGenerator : MonoBehaviour
                     continue;
 
                 connectorRegions.Clear();
-                foreach (var direction in _directions)
+                foreach (var direction in _manager.directions)
                 {
                     if (!_grid.CheckNextTile(tile, direction, 1))
                         continue;
@@ -218,6 +225,10 @@ public class MazeGenerator : MonoBehaviour
         {
             var connector = connectors[_random.Next(0, connectors.Count)];
             _grid.Carve(connector, connector.RegionId);
+
+            /*foreach (var direction in _manager.directions)
+                if(_grid.CheckNextTileType(connector, direction, 1, Tile.TileType.Floor))
+                    _grid.SetNextTileType(connector, direction, 1, Tile.TileType.Carpet);*/
         
             var regions = connector.ConnectorRegions.Select(r => merged[r]).ToList();
             var dest = regions.First();

@@ -1,4 +1,5 @@
 using System;
+using UnityEditor;
 using UnityEngine;
 
 public struct Grid
@@ -6,12 +7,14 @@ public struct Grid
     public Vector2Int Size;
     public Tile[,] Tiles;
     bool _isCircle;
+    readonly MazeGeneratorManager _manager;
 
     public Grid(Vector2Int size, bool isCircle = false)
     {
         Size = size;
         Tiles = new Tile[Size.x, Size.y];
         _isCircle = isCircle;
+        _manager = MazeGeneratorManager.Instance;
     }
 
     void InitSquare()
@@ -94,10 +97,37 @@ public struct Grid
     {
         var bounds = GetBounds(fromTile, direction, multiplier);
 
-        if (bounds.x >= Size.x || bounds.x <= 0 || bounds.y >= Size.y || bounds.y <= 0)// || (GetTile(new Vector2Int(bounds.x, bounds.y)).Type != Tile.TileType.Nothing))
+        if (bounds.x >= Size.x || bounds.x <= 0 || bounds.y >= Size.y || bounds.y <= 0)
             return false;
 
         return true;
+    }
+
+    public bool CheckNextTileType(Tile fromTile, Vector2Int direction, int multiplier, Tile.TileType type)
+    {
+        var bounds = GetBounds(fromTile, direction, multiplier);
+
+        if (bounds.x >= Size.x || bounds.x <= 0 || bounds.y >= Size.y || bounds.y <= 0)
+            return false;
+
+        if (Tiles[bounds.x, bounds.y].Type == type)
+            return true;
+
+        return false;
+    }
+
+    public int GetNeighboursNumber(Tile tile)
+    {
+        int total = 0;
+
+        foreach (var direction in _manager.directions)
+        {
+            if (!CheckNextTileType(tile, direction, 1, Tile.TileType.Floor))
+                continue;
+            total++;
+        }
+
+        return total;
     }
 
     Vector2Int GetBounds(Tile fromTile, Vector2Int direction, int multiplier)

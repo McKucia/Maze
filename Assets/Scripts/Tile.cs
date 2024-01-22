@@ -9,7 +9,8 @@ public class Tile : MonoBehaviour
         Room,
         Wall,
         Nothing,
-        Border
+        Border,
+        Carpet
     }
 
     public TileType Type;

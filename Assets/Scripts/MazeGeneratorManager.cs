@@ -17,6 +17,7 @@ public class MazeGeneratorManager : MonoBehaviour
     public GameObject tileFloorPrefab;
     public GameObject tileWallPrefab;
     public GameObject tileBorderPrefab;
+    public GameObject tileCarpetPrefab;
 
     [Range(0, 3)]   public int roomsPadding = 1;
     [Range(0, 3)]   public int roomExtraSize = 0;
@@ -24,6 +25,15 @@ public class MazeGeneratorManager : MonoBehaviour
     [Range(0, 250)] public int numRoomTries = 50;
     [Range(21, 81)] public int gridSizeX = 41;
     [Range(21, 81)] public int gridSizeY = 41;
+
+    [HideInInspector]
+    public List<Vector2Int> directions = new List<Vector2Int>()
+        {
+            new Vector2Int(0, 1),  // up
+            new Vector2Int(1, 0),  // right
+            new Vector2Int(0, -1), // down
+            new Vector2Int(-1, 0)  // left
+        };
 
     List<MazeGenerator> _generators;
     int _currentLevel = 0;
