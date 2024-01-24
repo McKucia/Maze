@@ -1,6 +1,7 @@
 #pragma kernel Highlight
 
 Texture2D<float4> source;
+RWTexture2D<float4> sourceCopy;
 RWTexture2D<float4> output;
 float radius;
 float edgeWidth;

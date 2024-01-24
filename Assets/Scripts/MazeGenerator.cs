@@ -7,6 +7,7 @@ using UnityEngine;
 public class MazeGenerator : MonoBehaviour
 {
     [HideInInspector] public Grid Grid;
+    [HideInInspector] public bool IsReady;
 
     readonly MazeGeneratorManager _manager = MazeGeneratorManager.Instance;
 
@@ -32,6 +33,7 @@ public class MazeGenerator : MonoBehaviour
 
     public async void Generate()
     {
+        IsReady = false;
         tileGameObjects.ForEach(t => Destroy(t));
 
         if(_playerObject)
@@ -64,6 +66,8 @@ public class MazeGenerator : MonoBehaviour
 
         foreach (var t in Grid.Tiles)
             SpawnTile(t);
+
+        IsReady = true;
     }
 
     void SpawnPlayer()

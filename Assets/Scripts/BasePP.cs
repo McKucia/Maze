@@ -44,8 +44,6 @@ public class BasePP : MonoBehaviour
         }
 
         CreateTextures();
-
-        init = true;
     }
 
     protected void ClearTexture(ref RenderTexture textureToClear)

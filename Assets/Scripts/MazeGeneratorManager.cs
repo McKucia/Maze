@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 
 public class MazeGeneratorManager : MonoBehaviour
@@ -22,6 +23,7 @@ public class MazeGeneratorManager : MonoBehaviour
     public GameObject tileCarpetPrefab;
     public GameObject playerPrefab;
     [HideInInspector] public int _currentLevel = 0;
+    [HideInInspector] public bool IsReady { get { return _generators[_currentLevel].IsReady; } }
 
     [Range(0, 3)]   public int roomsPadding = 1;
     [Range(0, 3)]   public int roomExtraSize = 0;
