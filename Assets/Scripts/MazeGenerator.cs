@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
+using static Tile;
 
 public class MazeGenerator : MonoBehaviour
 {
@@ -68,6 +69,13 @@ public class MazeGenerator : MonoBehaviour
             SpawnTile(t);
 
         IsReady = true;
+    }
+
+    public void DisplayMinimapTile(Vector2Int tilePosition)
+    {
+        var tile = Grid.GetTile(tilePosition);
+        if (tile.Exposed) return;
+        Grid.SetTileMinimapObjectActive(tile, true);
     }
 
     void SpawnPlayer()
@@ -147,8 +155,11 @@ public class MazeGenerator : MonoBehaviour
                 break;
         }
 
-        if(newTile != null)
+        if (newTile != null)
+        {
             tileGameObjects.Add(newTile);
+            Grid.SetTileObject(tile, newTile);
+        }
     }
 
     // Growing Tree

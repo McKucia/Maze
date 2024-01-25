@@ -73,4 +73,9 @@ public class MazeGeneratorManager : MonoBehaviour
     {
         return _generators[_currentLevel].Grid;
     }
+
+    public void DisplayMinimapTile(Vector2Int tilePosition)
+    {
+        _generators[_currentLevel].DisplayMinimapTile(tilePosition);
+    }
 }

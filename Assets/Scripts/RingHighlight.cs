@@ -13,7 +13,6 @@ public class RingHighlight : MonoBehaviour
 
     [SerializeField] ComputeShader shader = null;
 
-    bool firstPass = true;
     Vector2Int texSize = new Vector2Int(0, 0);
     Vector2Int groupSize = new Vector2Int();
     Camera thisCamera;
@@ -139,9 +138,10 @@ public class RingHighlight : MonoBehaviour
 
     void DispatchWithSource(ref RenderTexture source, ref RenderTexture destination)
     {
+        Graphics.Blit(source, renderedSource);
+
         shader.Dispatch(kernelID, groupSize.x, groupSize.y, 1);
 
-        Graphics.Blit(output, renderedSource);
         Graphics.Blit(output, destination);
     }
 
@@ -163,13 +163,7 @@ public class RingHighlight : MonoBehaviour
             }
             CheckResolution(out bool resChange);
             if (resChange) SetProperties();
-
-            if(firstPass)
-                Graphics.Blit(source, renderedSource);
-
             DispatchWithSource(ref source, ref destination);
-
-            firstPass = false;
         }
     }
 

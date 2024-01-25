@@ -8,6 +8,8 @@ public class PlayerMovement : MonoBehaviour
     MazeGeneratorManager _manager;
 
     bool _isMoving = false;
+    bool init = false;
+    Grid _grid;
     Vector2Int _target;
     Vector2Int _currentDirection;
     Vector2Int _currentPosition;
@@ -25,7 +27,12 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        if (!_manager.GetCurrentGrid().IsReady) return;
+        if (!_manager.IsReady) return;
+        if (!init)
+        {
+            _grid = _manager.GetCurrentGrid();
+            init = true;
+        }
 
         if (!_isMoving)
         {
@@ -49,22 +56,18 @@ public class PlayerMovement : MonoBehaviour
 
     Vector2Int GetTarget()
     {
-        var grid = _manager.GetCurrentGrid();
-
-        Tile targetTile = new Tile(null, _currentPosition);
-
         int i = 0;
-        Tile nextTile = grid.GetTile(_currentPosition);
+        Tile nextTile = _grid.GetTile(_currentPosition);
 
-        while(grid.GetNextTile(nextTile, _currentDirection, 1).Type != Tile.TileType.Wall &&
-            grid.GetNextTile(nextTile, _currentDirection, 1).Type != Tile.TileType.Carpet &&
-            i++ < grid.Size.x)
+        while(_grid.GetNextTile(nextTile, _currentDirection, 1).Type != Tile.TileType.Wall &&
+            _grid.GetNextTile(nextTile, _currentDirection, 1).Type != Tile.TileType.Carpet &&
+            i++ < _grid.Size.x)
         {
-            nextTile = grid.GetNextTile(nextTile, _currentDirection, 1);
+            nextTile = _grid.GetNextTile(nextTile, _currentDirection, 1);
         }
-        if (grid.GetNextTile(nextTile, _currentDirection, 1).Type == Tile.TileType.Carpet)
+        if (_grid.GetNextTile(nextTile, _currentDirection, 1).Type == Tile.TileType.Carpet)
         {
-            nextTile = grid.GetNextTile(nextTile, _currentDirection, 1);
+            nextTile = _grid.GetNextTile(nextTile, _currentDirection, 1);
         }
 
         _isMoving = true;
@@ -73,13 +76,21 @@ public class PlayerMovement : MonoBehaviour
 
     void Move()
     {
+        int positionX = Mathf.RoundToInt(transform.position.x);
+        int positionY = Mathf.RoundToInt(transform.position.z);
+
+        _currentPosition = new Vector2Int(positionX, positionY);
+
         var targetPosition = new Vector3(_target.x, 0f, _target.y);
-        transform.position = Vector3.MoveTowards(transform.position, targetPosition, Time.deltaTime  * _speed);
+        transform.position = Vector3.MoveTowards(transform.position, targetPosition, Time.deltaTime  * _speed / 2.0f);
+
         if (Vector3.Distance(transform.position, targetPosition) < 0.05f)
         {
             _isMoving = false;
             _currentPosition = _target;
             _currentDirection = Vector2Int.zero;
         }
+
+        _manager.DisplayMinimapTile(_currentPosition);
     }
 }

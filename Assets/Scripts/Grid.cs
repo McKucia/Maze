@@ -57,6 +57,16 @@ public struct Grid
         Tiles[tile.Position.x, tile.Position.y].RegionId = region;
     }
 
+    public void SetTileObject(Tile tile, GameObject tileObject)
+    {
+        Tiles[tile.Position.x, tile.Position.y].SetTileObject(tileObject);
+    }
+
+    public void SetTileMinimapObjectActive(Tile tile, bool active)
+    {
+        Tiles[tile.Position.x, tile.Position.y].SetTileMinimapObjectActive(active);
+    }
+
     public bool CanCarve(Tile fromTile, Vector2Int direction)
     {
         if (!CheckNextTile(fromTile, direction, 2))

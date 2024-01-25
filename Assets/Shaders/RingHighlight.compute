@@ -1,7 +1,6 @@
 #pragma kernel Highlight
 
 Texture2D<float4> source;
-RWTexture2D<float4> sourceCopy;
 RWTexture2D<float4> output;
 float radius;
 float edgeWidth;
@@ -14,6 +13,23 @@ float inCircle(float2 pt, float2 center, float radius, float edgeWidth)
     return 1.0 - smoothstep(radius - edgeWidth, radius, len);
 }
 
+float inSquare(float2 pt, float2 center, float radius, float edgeWidth)
+{
+    float leftSide = center.x - radius / 2;
+    float rightSide = center.x + radius / 2;
+    float topSide = center.y + radius / 2;
+    float bottomSide = center.y - radius / 2;
+    
+    if (pt.x > leftSide &&
+        pt.x < rightSide &&
+        pt.y > bottomSide &&
+        pt.y < topSide)
+    {
+        return 1.0;
+    }
+    return 0.0;
+}
+
 [numthreads(8, 8, 1)]
 void Highlight(uint3 id : SV_DispatchThreadID)
 {
@@ -22,6 +38,8 @@ void Highlight(uint3 id : SV_DispatchThreadID)
     float4 highlight = inCircle(id.xy, center.xy, radius, edgeWidth);
     float4 color = lerp(shadedSrcColor, srcColor, highlight);
     
+    //if (output[id.xy].r + output[id.xy].g + output[id.xy].b > color.r + color.g + color.b)
+    //    color = output[id.xy].rgba;
+    
     output[id.xy] = color;
-
 }
