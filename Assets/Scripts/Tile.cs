@@ -21,7 +21,7 @@ public struct Tile
     public List<int> ConnectorRegions;
     public bool Exposed;
     public GameObject tileObject;
-    public GameObject tileMinimapObject;
+    public MinimapTile tileMinimapObject;
 
     public Tile(Vector2Int? size, Vector2Int position, TileType type = TileType.Wall, int regionId = -1)
     {
@@ -46,15 +46,20 @@ public struct Tile
 
     public void SetTileObject(GameObject newTileObject)
     {
-        if (Type == Tile.TileType.Wall) return;
+        if (Type == TileType.Wall) return;
 
         tileObject = newTileObject;
-        tileMinimapObject = tileObject.transform.GetChild(0).gameObject;
+
+        tileMinimapObject = tileObject
+            .transform
+            .GetChild(0)
+            .gameObject
+            .GetComponent<MinimapTile>();
     }
 
     public void SetTileMinimapObjectActive(bool active)
     {
-        tileMinimapObject.SetActive(active);
+        tileMinimapObject.FadeIn();
         Exposed = active;
     }
 }
