@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class MinimapCamera : MonoBehaviour
@@ -33,6 +31,29 @@ public class MinimapCamera : MonoBehaviour
         transform.position = Vector3.SmoothDamp(transform.position, targetPosition, ref velocity, _smoothTime);
 
         transform.LookAt(_target);
+    }
+
+    public void UpdateOffset(CameraHolder.CameraPointings cameraPointing)
+    {
+        switch(cameraPointing) 
+        {
+            case CameraHolder.CameraPointings.Up:
+                _offset.x = Mathf.Abs(_offset.x);
+                _offset.z = Mathf.Abs(_offset.z);
+                break;
+            case CameraHolder.CameraPointings.Right:
+                _offset.x = Mathf.Abs(_offset.x);
+                _offset.z = Mathf.Abs(_offset.z) * -1;
+                break;
+            case CameraHolder.CameraPointings.Down:
+                _offset.x = Mathf.Abs(_offset.x) * -1;
+                _offset.z = Mathf.Abs(_offset.z) * -1;
+                break;
+            case CameraHolder.CameraPointings.Left:
+                _offset.x = Mathf.Abs(_offset.x) * -1;
+                _offset.z = Mathf.Abs(_offset.z);
+                break;
+        }
     }
 
     void OnPreRender()

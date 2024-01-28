@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.44657826, g: 0.49641263, b: 0.57481676, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1089,15 +1089,15 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1648813381}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 56e345454ef040d42bed67cd9bcc71ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  radius: 8
-  softenEdge: 100
+  radius: 35.9
+  softenEdge: 66.1
   shade: 0
-  trackedObject: {fileID: 3088521223328290624, guid: 5d550660ba81f0443be706b959b3b432, type: 3}
+  trackedObject: {fileID: 0}
   shader: {fileID: 7200000, guid: ff4260b5459d9f04cb2bddaad13d89af, type: 3}
 --- !u!114 &1648813386
 MonoBehaviour:
@@ -1160,6 +1160,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _rotationTime: 0.2
+  _minimapCamera: {fileID: 1648813386}
 --- !u!1 &1986907392
 GameObject:
   m_ObjectHideFlags: 0
@@ -1228,7 +1229,7 @@ SceneRoots:
   - {fileID: 705507995}
   - {fileID: 1986907394}
   - {fileID: 473128554}
-  - {fileID: 1804329948}
-  - {fileID: 1067451689}
   - {fileID: 1352467185}
+  - {fileID: 1804329948}
   - {fileID: 1648813384}
+  - {fileID: 1067451689}

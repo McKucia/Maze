@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -13,6 +12,11 @@ public class PlayerMovement : MonoBehaviour
     Vector2Int _target;
     Vector2Int _currentDirection;
     Vector2Int _currentPosition;
+
+    Vector2Int _vectorUp = Vector2Int.up;
+    Vector2Int _vectorRight = Vector2Int.right;
+    Vector2Int _vectorDown = Vector2Int.down;
+    Vector2Int _vectorLeft = Vector2Int.left;
 
     void Start()
     {
@@ -48,10 +52,42 @@ public class PlayerMovement : MonoBehaviour
 
     void HandleInput()
     {
-        if (Input.GetKeyDown(KeyCode.W)) _currentDirection = Vector2Int.up;
-        if (Input.GetKeyDown(KeyCode.D)) _currentDirection = Vector2Int.right;
-        if (Input.GetKeyDown(KeyCode.S)) _currentDirection = Vector2Int.down;
-        if (Input.GetKeyDown(KeyCode.A)) _currentDirection = Vector2Int.left;
+        if (Input.GetKeyDown(KeyCode.W)) _currentDirection = _vectorUp;
+        if (Input.GetKeyDown(KeyCode.D)) _currentDirection = _vectorRight;
+        if (Input.GetKeyDown(KeyCode.S)) _currentDirection = _vectorDown;
+        if (Input.GetKeyDown(KeyCode.A)) _currentDirection = _vectorLeft;
+    }
+
+    public void UpdateKeys(CameraHolder.CameraPointings cameraPointing)
+    {
+        // TODO: cos trzeba z tym zrobic
+        switch (cameraPointing)
+        {
+            case CameraHolder.CameraPointings.Up:
+                _vectorUp = Vector2Int.up;
+                _vectorRight = Vector2Int.right;
+                _vectorDown = Vector2Int.down;
+                _vectorLeft = Vector2Int.left;
+                break;
+            case CameraHolder.CameraPointings.Right:
+                _vectorUp = Vector2Int.right;
+                _vectorRight = Vector2Int.down;
+                _vectorDown = Vector2Int.left;
+                _vectorLeft = Vector2Int.up;
+                break;
+            case CameraHolder.CameraPointings.Down:
+                _vectorUp = Vector2Int.down;
+                _vectorRight = Vector2Int.left;
+                _vectorDown = Vector2Int.up;
+                _vectorLeft = Vector2Int.right;
+                break;
+            case CameraHolder.CameraPointings.Left:
+                _vectorUp = Vector2Int.left;
+                _vectorRight = Vector2Int.up;
+                _vectorDown = Vector2Int.right;
+                _vectorLeft = Vector2Int.down;
+                break;
+        }
     }
 
     Vector2Int GetTarget()
