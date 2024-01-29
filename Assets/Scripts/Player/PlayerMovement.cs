@@ -4,10 +4,8 @@ public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] int _speed = 8;
 
-    MazeGeneratorManager _manager;
-
     bool _isMoving = false;
-    bool init = false;
+    bool _init = false;
     Grid _grid;
     Vector2Int _target;
     Vector2Int _currentDirection;
@@ -21,7 +19,6 @@ public class PlayerMovement : MonoBehaviour
     void Start()
     {
         _currentDirection = Vector2Int.zero;
-        _manager = MazeGeneratorManager.Instance;
 
         int positionX = Mathf.FloorToInt(transform.position.x);
         int positionY = Mathf.FloorToInt(transform.position.z);
@@ -31,11 +28,11 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        if (!_manager.IsReady) return;
-        if (!init)
+        if (!MazeGeneratorManager.Instance.IsReady) return;
+        if (!_init)
         {
-            _grid = _manager.GetCurrentGrid();
-            init = true;
+            _grid = MazeGeneratorManager.Instance.GetCurrentGrid();
+            _init = true;
         }
 
         if (!_isMoving)
@@ -58,30 +55,29 @@ public class PlayerMovement : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.A)) _currentDirection = _vectorLeft;
     }
 
-    public void UpdateKeys(CameraHolder.CameraPointings cameraPointing)
+    public void UpdateKeys()
     {
-        // TODO: cos trzeba z tym zrobic
-        switch (cameraPointing)
+        switch (GameManager.Instance.CameraPointing)
         {
-            case CameraHolder.CameraPointings.Up:
+            case GameManager.CameraPointings.Up:
                 _vectorUp = Vector2Int.up;
                 _vectorRight = Vector2Int.right;
                 _vectorDown = Vector2Int.down;
                 _vectorLeft = Vector2Int.left;
                 break;
-            case CameraHolder.CameraPointings.Right:
+            case GameManager.CameraPointings.Right:
                 _vectorUp = Vector2Int.right;
                 _vectorRight = Vector2Int.down;
                 _vectorDown = Vector2Int.left;
                 _vectorLeft = Vector2Int.up;
                 break;
-            case CameraHolder.CameraPointings.Down:
+            case GameManager.CameraPointings.Down:
                 _vectorUp = Vector2Int.down;
                 _vectorRight = Vector2Int.left;
                 _vectorDown = Vector2Int.up;
                 _vectorLeft = Vector2Int.right;
                 break;
-            case CameraHolder.CameraPointings.Left:
+            case GameManager.CameraPointings.Left:
                 _vectorUp = Vector2Int.left;
                 _vectorRight = Vector2Int.up;
                 _vectorDown = Vector2Int.right;
@@ -127,6 +123,6 @@ public class PlayerMovement : MonoBehaviour
             _currentDirection = Vector2Int.zero;
         }
 
-        _manager.DisplayMinimapTile(_currentPosition);
+        MazeGeneratorManager.Instance.DisplayMinimapTile(_currentPosition);
     }
 }

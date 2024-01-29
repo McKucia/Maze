@@ -5,21 +5,14 @@ public class MinimapCamera : MonoBehaviour
     [SerializeField] Vector3 _offset;
     [SerializeField] float _smoothTime = 0.3f;
 
-    MazeGeneratorManager _manager;
-
     Vector3 velocity = Vector3.zero;
     float _storedShadowDistance;
     Transform _target;
     bool _init = false;
 
-    private void Start()
-    {
-        _manager = MazeGeneratorManager.Instance;
-    }
-
     private void LateUpdate()
     {
-        if (!_manager.IsReady) return;
+        if (!MazeGeneratorManager.Instance.IsReady) return;
         if (!_init) 
         { 
             _target = GameObject.FindWithTag("Player").transform;
@@ -33,23 +26,23 @@ public class MinimapCamera : MonoBehaviour
         transform.LookAt(_target);
     }
 
-    public void UpdateOffset(CameraHolder.CameraPointings cameraPointing)
+    public void UpdateOffset()
     {
-        switch(cameraPointing) 
+        switch(GameManager.Instance.CameraPointing) 
         {
-            case CameraHolder.CameraPointings.Up:
+            case GameManager.CameraPointings.Up:
                 _offset.x = Mathf.Abs(_offset.x);
                 _offset.z = Mathf.Abs(_offset.z);
                 break;
-            case CameraHolder.CameraPointings.Right:
+            case GameManager.CameraPointings.Right:
                 _offset.x = Mathf.Abs(_offset.x);
                 _offset.z = Mathf.Abs(_offset.z) * -1;
                 break;
-            case CameraHolder.CameraPointings.Down:
+            case GameManager.CameraPointings.Down:
                 _offset.x = Mathf.Abs(_offset.x) * -1;
                 _offset.z = Mathf.Abs(_offset.z) * -1;
                 break;
-            case CameraHolder.CameraPointings.Left:
+            case GameManager.CameraPointings.Left:
                 _offset.x = Mathf.Abs(_offset.x) * -1;
                 _offset.z = Mathf.Abs(_offset.z);
                 break;
