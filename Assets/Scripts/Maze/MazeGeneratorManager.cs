@@ -1,7 +1,7 @@
 using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices.WindowsRuntime;
+using Unity.AI.Navigation;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class MazeGeneratorManager : MonoBehaviour
 {
@@ -22,6 +22,8 @@ public class MazeGeneratorManager : MonoBehaviour
     public GameObject tileBorderPrefab;
     public GameObject tileCarpetPrefab;
     public GameObject playerPrefab;
+    public GameObject enemyPrefab;
+    public NavMeshSurface surface;
     [HideInInspector] public int _currentLevel = 0;
     [HideInInspector] public bool IsReady { get { return _generators[_currentLevel].IsReady; } }
 

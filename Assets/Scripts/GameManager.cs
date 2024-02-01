@@ -21,6 +21,11 @@ public class GameManager : MonoBehaviour
     }
     #endregion
 
+    public bool Initialized
+    {
+        get { return _mazeInit; } 
+    }
+
     MinimapCamera _minimapCamera;
     PlayerMovement _playerMovement;
     bool _mazeInit = false;

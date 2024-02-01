@@ -2,6 +2,7 @@ using Cinemachine;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Unity.AI.Navigation;
 using UnityEngine;
 using static Tile;
 
@@ -54,19 +55,23 @@ public class MazeGenerator : MonoBehaviour
                     if (tile.Type != Tile.TileType.Wall) continue;
                     GrowMaze(tile);
                 }
-            
+
             ConnectRegions();
             AddCarpets();
             Grid.IsReady = true;
         });
 
-        if (_level == _manager._currentLevel)
-            SpawnPlayer();
-
-        _manager.virtualCamera.GetComponent<CinemachineVirtualCamera>().Follow = _playerObject.transform;
-
         foreach (var t in Grid.Tiles)
             SpawnTile(t);
+
+        if (_level == _manager._currentLevel)
+        {
+            _manager.surface.BuildNavMesh();
+            SpawnPlayer();
+            SpawnEnemies();
+        }
+
+        _manager.virtualCamera.GetComponent<CinemachineVirtualCamera>().Follow = _playerObject.transform;
 
         IsReady = true;
     }
@@ -83,9 +88,18 @@ public class MazeGenerator : MonoBehaviour
         foreach (var tile in Grid.Tiles)
             if (tile.Type == Tile.TileType.Floor)
             {
-                _playerObject = Instantiate(_manager.playerPrefab, new Vector3(tile.Position.x, 0, tile.Position.y), Quaternion.identity);
+                _playerObject = Instantiate(_manager.playerPrefab, new Vector3(tile.Position.x, 0.5f, tile.Position.y), Quaternion.identity);
                 break;
             }
+    }
+
+    void SpawnEnemies()
+    {
+        foreach (var room in _rooms)
+        {
+            var enemyObject = Instantiate(_manager.enemyPrefab, new Vector3(room.Position.x, 0.5f, room.Position.y), Quaternion.identity);
+            enemyObject.GetComponent<Enemy>().SetRoom(room);
+        }
     }
 
     void ResetGenerator()

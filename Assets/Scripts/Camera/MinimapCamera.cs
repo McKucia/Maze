@@ -12,7 +12,7 @@ public class MinimapCamera : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (!MazeGeneratorManager.Instance.IsReady) return;
+        if (!GameManager.Instance.Initialized) return;
         if (!_init) 
         { 
             _target = GameObject.FindWithTag("Player").transform;

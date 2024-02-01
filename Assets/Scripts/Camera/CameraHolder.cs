@@ -11,7 +11,7 @@ public class CameraHolder : MonoBehaviour
 
     void Update()
     {
-        if (!MazeGeneratorManager.Instance.IsReady) return;
+        if (!GameManager.Instance.Initialized) return;
 
         if (!isRotating)
         {

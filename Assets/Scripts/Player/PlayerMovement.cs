@@ -3,7 +3,9 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] int _speed = 8;
+    public Rigidbody Rb => _rb;
 
+    Rigidbody _rb;
     bool _isMoving = false;
     bool _init = false;
     Grid _grid;
@@ -18,6 +20,7 @@ public class PlayerMovement : MonoBehaviour
 
     void Start()
     {
+        _rb = GetComponent<Rigidbody>();
         _currentDirection = Vector2Int.zero;
 
         int positionX = Mathf.FloorToInt(transform.position.x);
@@ -28,7 +31,7 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        if (!MazeGeneratorManager.Instance.IsReady) return;
+        if (!GameManager.Instance.Initialized) return;
         if (!_init)
         {
             _grid = MazeGeneratorManager.Instance.GetCurrentGrid();
@@ -113,7 +116,7 @@ public class PlayerMovement : MonoBehaviour
 
         _currentPosition = new Vector2Int(positionX, positionY);
 
-        var targetPosition = new Vector3(_target.x, 0f, _target.y);
+        var targetPosition = new Vector3(_target.x, transform.position.y, _target.y);
         transform.position = Vector3.MoveTowards(transform.position, targetPosition, Time.deltaTime  * _speed / 2.0f);
 
         if (Vector3.Distance(transform.position, targetPosition) < 0.05f)
