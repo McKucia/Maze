@@ -1,8 +1,10 @@
+using System.Collections;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] int _speed = 8;
+    [SerializeField] Material _playerMaterial;
     public Rigidbody Rb => _rb;
 
     Rigidbody _rb;
@@ -127,5 +129,17 @@ public class PlayerMovement : MonoBehaviour
         }
 
         MazeGeneratorManager.Instance.DisplayMinimapTile(_currentPosition);
+    }
+
+    public void Hit()
+    {
+        StartCoroutine(ChangeColor());
+    }
+
+    IEnumerator ChangeColor()
+    {
+        _playerMaterial.SetColor("_Color", Color.red);
+        yield return new WaitForSeconds(0.2f);
+        _playerMaterial.SetColor("_Color", Color.green);
     }
 }

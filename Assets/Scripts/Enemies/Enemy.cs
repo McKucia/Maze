@@ -6,6 +6,7 @@ public class Enemy : MonoBehaviour
     [SerializeField] float _viewAngle = 90f;
     [SerializeField] float _attackAngle = 20f;
     [SerializeField] float _sightRange = 3f;
+    [SerializeField] float _hearRange = 1f;
     [SerializeField] float _attackRange = 1f;
     [SerializeField] float _searchingTime = 10f;
     [SerializeField] float _restingTime = 3f;
@@ -55,7 +56,7 @@ public class Enemy : MonoBehaviour
 
         if (!_isFollowing)
         {
-            if (CanSeeTarget())
+            if (CanSeeTarget() || CanHearTarget())
             {
                 _isFollowing = true;
                 // _followingCircleBar.fillValue = 100;
@@ -70,7 +71,7 @@ public class Enemy : MonoBehaviour
         {
             ChasePlayer();
 
-            if(!CanSeeTarget())
+            if(!CanSeeTarget() && !CanHearTarget())
             {
                 _searchingTimeElapsed += Time.deltaTime;
                 // _followingCircleBar.fillValue = (_searchingTime - _searchingTimeElapsed) * 10;
@@ -162,7 +163,7 @@ public class Enemy : MonoBehaviour
         if (_attackTimeElapsed >= _attackTime)
         {
             var missile = Instantiate(_missilePrefab, transform.position, Quaternion.identity);
-            missile.GetComponent<Missile>().Target = _player.GetChild(0).transform;
+            missile.GetComponent<Missile>().Target = _player;
             _attackTimeElapsed = 0;
         }
     }
@@ -183,6 +184,8 @@ public class Enemy : MonoBehaviour
     }
 
     bool CanSeeTarget() { return InAngle(_viewAngle) && InRange(_sightRange); }
+
+    bool CanHearTarget() { return InRange(_hearRange); }
 
     bool CanAttackTarget() { return InAngle(_attackAngle) && InRange(_attackRange); }
 

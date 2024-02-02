@@ -1,28 +1,49 @@
-using System.Collections;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class Missile : MonoBehaviour
 {
     [HideInInspector] public Transform Target;
-    [SerializeField] float _speed = 6f;
+    [SerializeField] float _howHigh = 10f;
+    [SerializeField] float _gravity = -18;
+
+    Rigidbody _rb;
 
     void Start()
     {
-        StartCoroutine(SendHoming());
+        _rb = GetComponent<Rigidbody>();
+        Launch();
     }
 
-    IEnumerator SendHoming()
+    void Update()
     {
-        while(Vector3.Distance(Target.position, transform.position) > 0.3f)
-        {
-            var updatePosition = (Target.position - transform.position).normalized * _speed * Time.deltaTime;
-            transform.position += new Vector3(updatePosition.x, -Time.deltaTime, updatePosition.z);
-            transform.LookAt(Target);
+        CheckCollide();
+    }
 
-            if (Physics.OverlapSphere(transform.position, 0.1f).Length > 0) Destroy(gameObject);
-            yield return null;
+    void Launch()
+    {
+        Physics.gravity = Vector3.up * _gravity;
+        _rb.velocity = CalculateLaunchData();
+    }
+
+    Vector3 CalculateLaunchData()
+    {
+        float displacementY = Target.position.y - transform.position.y;
+        Vector3 displacementXZ = new Vector3(Target.position.x - transform.position.x, 0, Target.position.z - transform.position.z);
+
+        Vector3 velocityY = Vector3.up * Mathf.Sqrt(-2 * _gravity * _howHigh);
+        Vector3 velocityXZ = displacementXZ / (Mathf.Sqrt(-2 * _howHigh / _gravity) + Mathf.Sqrt(2 * (displacementY - _howHigh) / _gravity));
+
+        return velocityXZ + velocityY;
+    }
+
+    void CheckCollide()
+    {
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, 0.1f);
+        foreach (var hitCollider in hitColliders)
+        {
+            if (hitCollider.gameObject.tag == "Player")
+                Target.gameObject.GetComponent<PlayerMovement>().Hit();
+            Destroy(this.gameObject);
         }
-        Destroy(gameObject);
     }
 }
