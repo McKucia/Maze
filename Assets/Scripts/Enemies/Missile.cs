@@ -16,7 +16,8 @@ public class Missile : MonoBehaviour
     {
         while(Vector3.Distance(Target.position, transform.position) > 0.3f)
         {
-            transform.position += (Target.position - transform.position).normalized * _speed * Time.deltaTime;
+            var updatePosition = (Target.position - transform.position).normalized * _speed * Time.deltaTime;
+            transform.position += new Vector3(updatePosition.x, -Time.deltaTime, updatePosition.z);
             transform.LookAt(Target);
 
             if (Physics.OverlapSphere(transform.position, 0.1f).Length > 0) Destroy(gameObject);

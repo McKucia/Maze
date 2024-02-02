@@ -129,35 +129,35 @@ public class Enemy : MonoBehaviour
 
     void ChasePlayer()
     {
-        if (CanAttackTarget())
+        _agent.SetDestination(_player.position);
+
+        if (InRange(_attackRange))
         {
             _agent.isStopped = true;
-            _isAttacking = true;
+            if (!InAngle(_attackAngle))
+            {
+                var lookPos = _player.position - transform.position;
+                lookPos.y = 0;
+                var rotation = Quaternion.LookRotation(lookPos);
+                transform.rotation = Quaternion.Slerp(transform.rotation, rotation, Time.deltaTime * 6f);
 
-            AttackPlayer();
+                return;
+            }
+            else
+            {
+                AttackPlayer();
+            }
         }
         else
         {
             _agent.isStopped = false;
-            _isAttacking = false;
             _attackTimeElapsed = 0;
         }
-
-        _agent.SetDestination(_player.position);
     }
 
     void AttackPlayer()
     {
         _attackTimeElapsed += Time.deltaTime;
-        if (!InAngle(_attackAngle))
-        {
-            var lookPos = _player.position - transform.position;
-            lookPos.y = 0;
-            var rotation = Quaternion.LookRotation(lookPos);
-            transform.rotation = Quaternion.Slerp(transform.rotation, rotation, Time.deltaTime * 6f);
-
-            return;
-        }
 
         if (_attackTimeElapsed >= _attackTime)
         {
@@ -182,15 +182,9 @@ public class Enemy : MonoBehaviour
         return Vector3.Angle(transform.forward, toTarget) <= angle;
     }
 
-    bool CanSeeTarget()
-    {
-        return InAngle(_viewAngle) && InRange(_sightRange);
-    }
+    bool CanSeeTarget() { return InAngle(_viewAngle) && InRange(_sightRange); }
 
-    bool CanAttackTarget()
-    {
-        return InRange(_attackRange);
-    }
+    bool CanAttackTarget() { return InAngle(_attackAngle) && InRange(_attackRange); }
 
     public void SetRoom(Room room) => _room = room;
 }
