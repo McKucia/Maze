@@ -1,3 +1,4 @@
+using Cinemachine;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -26,6 +27,8 @@ public class GameManager : MonoBehaviour
         get { return _mazeInit; } 
     }
 
+    CinemachineVirtualCamera _virtualCamera;
+    CinemachineBasicMultiChannelPerlin _virtualCameraNoise;
     MinimapCamera _minimapCamera;
     PlayerMovement _playerMovement;
     bool _mazeInit = false;
@@ -37,9 +40,19 @@ public class GameManager : MonoBehaviour
         {
             _playerMovement = GameObject.FindWithTag("Player").GetComponent<PlayerMovement>();
             _minimapCamera = GameObject.FindWithTag("MinimapCamera").GetComponent<MinimapCamera>();
+            _virtualCamera = GameObject.FindWithTag("VirtualCamera").GetComponent<CinemachineVirtualCamera>();
+            _virtualCameraNoise = _virtualCamera.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
             _mazeInit = true;
         }
     }
+
+    #region
+    public void ChangeVirtualCameraNoise(float amplitude, float frequency)
+    {
+        _virtualCameraNoise.m_AmplitudeGain = amplitude;
+        _virtualCameraNoise.m_FrequencyGain = frequency;
+    }
+    #endregion
 
     #region CameraRotation
     public enum CameraPointings

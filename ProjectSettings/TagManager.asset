@@ -6,6 +6,7 @@ TagManager:
   tags:
   - MinimapCamera
   - Enemy
+  - VirtualCamera
   layers:
   - Default
   - TransparentFX

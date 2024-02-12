@@ -76,9 +76,8 @@ public class MazeGenerator : MonoBehaviour
         IsReady = true;
     }
 
-    public void DisplayMinimapTile(Vector2Int tilePosition)
+    public void DisplayMinimapTile(Tile tile)
     {
-        var tile = Grid.GetTile(tilePosition);
         if (tile.Exposed) return;
         Grid.SetTileMinimapObjectActive(tile, true);
     }

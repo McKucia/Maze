@@ -1,19 +1,34 @@
+using Cinemachine;
 using System.Collections;
+using TMPro;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    [SerializeField] int _speed = 8;
+    [SerializeField] int _moveSpeed = 8;
+    [SerializeField] int _chargeSpeed = 14;
+    [SerializeField] int _rotationSpeed = 14;
+    [SerializeField] float _chargeNoiseAmplitude = 0.1f;
+    [SerializeField] float _chargeNoiseFrequency = 50f;
+    [SerializeField] float _moveNoiseAmplitude = 1f;
+    [SerializeField] float _moveNoiseFrequency = 0.2f;
     [SerializeField] Material _playerMaterial;
+    [SerializeField] Transform _playerModel;
     public Rigidbody Rb => _rb;
 
     Rigidbody _rb;
+    int _speed;
     bool _isMoving = false;
+    bool _isMovingToTarget = false;
+    bool _isCharging = false;
+    bool _chargeChange = false;
     bool _init = false;
     Grid _grid;
     Vector2Int _target;
     Vector2Int _currentDirection;
+    Vector2Int _nextDirection;
     Vector2Int _currentPosition;
+    Tile _currentTile;
 
     Vector2Int _vectorUp = Vector2Int.up;
     Vector2Int _vectorRight = Vector2Int.right;
@@ -40,24 +55,62 @@ public class PlayerMovement : MonoBehaviour
             _init = true;
         }
 
+        HandleInput();
+        RotatePlayer();
         if (!_isMoving)
         {
-            HandleInput();
             if (_currentDirection != Vector2Int.zero)
-                _target = GetTarget();
+                _isMoving = true;
         }
         else
         {
+            GetCurrentTile();
             Move();
+        }
+        if(_isMovingToTarget)
+        {
+            GetCurrentTile();
+            MoveToTarget();
+        }
+        if(_isCharging)
+        {
+            _speed = _chargeSpeed;
+        }
+        else
+        {
+            _speed = _moveSpeed;
+        }
+        if(_chargeChange)
+        {
+            SetVirtualCameraNoise();
         }
     }
 
     void HandleInput()
     {
-        if (Input.GetKeyDown(KeyCode.W)) _currentDirection = _vectorUp;
-        if (Input.GetKeyDown(KeyCode.D)) _currentDirection = _vectorRight;
-        if (Input.GetKeyDown(KeyCode.S)) _currentDirection = _vectorDown;
-        if (Input.GetKeyDown(KeyCode.A)) _currentDirection = _vectorLeft;
+        _chargeChange = false;
+        var direction = Vector2Int.zero;
+
+        if (Input.GetKeyDown(KeyCode.W)) direction = _vectorUp;
+        if (Input.GetKeyDown(KeyCode.D)) direction = _vectorRight;
+        if (Input.GetKeyDown(KeyCode.S)) direction = _vectorDown;
+        if (Input.GetKeyDown(KeyCode.A)) direction = _vectorLeft;
+
+        var prevIsCharging = _isCharging;
+        _isCharging = Input.GetKey(KeyCode.LeftShift) && _isMoving;
+        if (prevIsCharging != _isCharging) _chargeChange = true;
+
+        if (!_isMoving) _currentDirection = direction;
+        if (_isMoving && _currentDirection != direction && direction != Vector2Int.zero) _nextDirection = direction;
+    }
+
+    void RotatePlayer()
+    {
+        Vector3 targetPosition = new Vector3(_currentDirection.x + transform.position.x, transform.position.y, _currentDirection.y + transform.position.z);
+        var targetDirection = targetPosition - transform.position;
+        float singleStep = _rotationSpeed * Time.deltaTime;
+        Vector3 newDirection = Vector3.RotateTowards(_playerModel.forward, targetDirection, singleStep, 0.0f);
+        _playerModel.rotation = Quaternion.LookRotation(newDirection);
     }
 
     public void UpdateKeys()
@@ -91,49 +144,88 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    Vector2Int GetTarget()
-    {
-        int i = 0;
-        Tile nextTile = _grid.GetTile(_currentPosition);
-
-        while(_grid.GetNextTile(nextTile, _currentDirection, 1).Type != Tile.TileType.Wall &&
-            _grid.GetNextTile(nextTile, _currentDirection, 1).Type != Tile.TileType.Carpet &&
-            i++ < _grid.Size.x)
-        {
-            nextTile = _grid.GetNextTile(nextTile, _currentDirection, 1);
-        }
-        if (_grid.GetNextTile(nextTile, _currentDirection, 1).Type == Tile.TileType.Carpet)
-        {
-            nextTile = _grid.GetNextTile(nextTile, _currentDirection, 1);
-        }
-
-        _isMoving = true;
-        return new Vector2Int(nextTile.Position.x, nextTile.Position.y);
-    }
-
     void Move()
     {
-        int positionX = Mathf.RoundToInt(transform.position.x);
-        int positionY = Mathf.RoundToInt(transform.position.z);
+        var nextTile = _grid.GetNextTile(_currentTile, _currentDirection, 1);
 
-        _currentPosition = new Vector2Int(positionX, positionY);
-
-        var targetPosition = new Vector3(_target.x, transform.position.y, _target.y);
-        transform.position = Vector3.MoveTowards(transform.position, targetPosition, Time.deltaTime  * _speed / 2.0f);
-
-        if (Vector3.Distance(transform.position, targetPosition) < 0.05f)
+        if (_nextDirection != Vector2Int.zero)
         {
-            _isMoving = false;
-            _currentPosition = _target;
-            _currentDirection = Vector2Int.zero;
+            var nextDirectionTile = _grid.GetNextTile(_currentTile, _nextDirection, 1);
+
+            if (nextDirectionTile.Type != Tile.TileType.Wall)
+            {
+                if (Distance2D(nextDirectionTile.Position) == 1f)
+                {
+                    _currentDirection = _nextDirection;
+                    _nextDirection = Vector2Int.zero;
+                    nextTile = _grid.GetNextTile(_currentTile, _currentDirection, 1);
+                }
+                else if(Distance2D(_currentTile.Position) < 0.05f)
+                {
+                    _target = _currentTile.Position;
+                    _isMovingToTarget = true;
+                    _isMoving = false;
+                    return;
+                }
+            }
         }
 
-        MazeGeneratorManager.Instance.DisplayMinimapTile(_currentPosition);
+        if (nextTile.Type == Tile.TileType.Wall &&
+            Distance2D(nextTile.Position) <= 1f)
+        {
+            _currentDirection = Vector2Int.zero;
+            _nextDirection = Vector2Int.zero;
+            transform.position = new Vector3(_currentTile.Position.x, transform.position.y, _currentTile.Position.y);
+            _isMoving = false;
+            return;
+        }
+
+        transform.Translate(new Vector3(_currentDirection.x, 0, _currentDirection.y) * Time.deltaTime * _speed / 2.0f);
+    }
+
+    float Distance2D(Vector2Int to)
+    {
+        return Vector2.Distance(new Vector2(transform.position.x, transform.position.z), to);
+    }
+
+    void MoveToTarget()
+    {
+        var targetPosition = new Vector3(_target.x, transform.position.y, _target.y);
+        transform.position = Vector3.MoveTowards(transform.position, targetPosition, Time.deltaTime * _speed / 2.0f);
+
+        if (Vector3.Distance(transform.position, targetPosition) < 0.01f)
+        {
+            _isMovingToTarget = false;
+            _isMoving = true;
+            _currentPosition = _target;
+            _currentDirection = Vector2Int.zero;
+            transform.position = new Vector3(_currentTile.Position.x, transform.position.y, _currentTile.Position.y);
+        }
     }
 
     public void Hit()
     {
         StartCoroutine(ChangeColor());
+    }
+
+    void GetCurrentTile()
+    {
+        int positionX = Mathf.RoundToInt(transform.position.x);
+        int positionY = Mathf.RoundToInt(transform.position.z);
+
+        _currentPosition = new Vector2Int(positionX, positionY);
+        _currentTile = _grid.GetTile(_currentPosition);
+
+        if (!_currentTile.Exposed)
+            MazeGeneratorManager.Instance.DisplayMinimapTile(_currentTile);
+    }
+
+    void SetVirtualCameraNoise()
+    {
+        if(_isCharging)
+            GameManager.Instance.ChangeVirtualCameraNoise(_chargeNoiseAmplitude, _chargeNoiseFrequency);
+        else
+            GameManager.Instance.ChangeVirtualCameraNoise(_moveNoiseAmplitude, _moveNoiseFrequency);
     }
 
     IEnumerator ChangeColor()

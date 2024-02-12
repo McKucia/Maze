@@ -100,8 +100,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 39dc15f5cdd29184e85dbfc49c12ac3a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _speed: 12
+  _moveSpeed: 8
+  _chargeSpeed: 14
+  _chargeNoiseAmplitude: 0.1
+  _chargeNoiseFrequency: 50
+  _moveNoiseAmplitude: 1
+  _moveNoiseFrequency: 0.5
   _playerMaterial: {fileID: 2100000, guid: 92bddfd456ec965418a4c7df6bcd8bcf, type: 2}
+  _playerModel: {fileID: 2772117300016636975}
 --- !u!54 &-5748004592945611408
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -288,6 +294,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: a3722d2c98a02df42bfbbfe7b9d8ea0e, type: 3}
       propertyPath: m_Name
       value: "Posta\u0107DunedlaMateja"
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: a3722d2c98a02df42bfbbfe7b9d8ea0e, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
