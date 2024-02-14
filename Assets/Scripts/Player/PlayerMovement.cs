@@ -10,8 +10,10 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] int _rotationSpeed = 14;
     [SerializeField] float _chargeNoiseAmplitude = 0.1f;
     [SerializeField] float _chargeNoiseFrequency = 50f;
+    [SerializeField] float _chargeLensOrthoSize = 2f;
     [SerializeField] float _moveNoiseAmplitude = 1f;
     [SerializeField] float _moveNoiseFrequency = 0.2f;
+    [SerializeField] float _moveLensOrthoSize = 3f;
     [SerializeField] Material _playerMaterial;
     [SerializeField] Transform _playerModel;
     public Rigidbody Rb => _rb;
@@ -222,10 +224,20 @@ public class PlayerMovement : MonoBehaviour
 
     void SetVirtualCameraNoise()
     {
-        if(_isCharging)
-            GameManager.Instance.ChangeVirtualCameraNoise(_chargeNoiseAmplitude, _chargeNoiseFrequency);
+        if (_isCharging)
+        {
+            GameManager.Instance.CameraOrthoSize = _chargeLensOrthoSize;
+            GameManager.Instance.CameraNoiseAmplitude = _chargeNoiseAmplitude;
+            GameManager.Instance.CameraNoiseFrequency = _chargeNoiseFrequency;
+            GameManager.Instance.ChangeVirtualCameraNoiseProfile("shake");
+        }
         else
-            GameManager.Instance.ChangeVirtualCameraNoise(_moveNoiseAmplitude, _moveNoiseFrequency);
+        {
+            GameManager.Instance.CameraOrthoSize = _moveLensOrthoSize;
+            GameManager.Instance.CameraNoiseAmplitude = _moveNoiseAmplitude;
+            GameManager.Instance.CameraNoiseFrequency = _moveNoiseFrequency;
+            GameManager.Instance.ChangeVirtualCameraNoiseProfile("handheld");
+        }
     }
 
     IEnumerator ChangeColor()

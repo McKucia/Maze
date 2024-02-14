@@ -102,10 +102,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _moveSpeed: 8
   _chargeSpeed: 14
-  _chargeNoiseAmplitude: 0.1
-  _chargeNoiseFrequency: 50
-  _moveNoiseAmplitude: 1
-  _moveNoiseFrequency: 0.5
+  _rotationSpeed: 14
+  _chargeNoiseAmplitude: 0.7
+  _chargeNoiseFrequency: 30
+  _chargeLensOrthoSize: 3.2
+  _moveNoiseAmplitude: 0.7
+  _moveNoiseFrequency: 0.2
+  _moveLensOrthoSize: 3
   _playerMaterial: {fileID: 2100000, guid: 92bddfd456ec965418a4c7df6bcd8bcf, type: 2}
   _playerModel: {fileID: 2772117300016636975}
 --- !u!54 &-5748004592945611408

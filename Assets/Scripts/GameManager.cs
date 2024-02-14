@@ -27,15 +27,18 @@ public class GameManager : MonoBehaviour
         get { return _mazeInit; } 
     }
 
-    CinemachineVirtualCamera _virtualCamera;
-    CinemachineBasicMultiChannelPerlin _virtualCameraNoise;
     MinimapCamera _minimapCamera;
     PlayerMovement _playerMovement;
     bool _mazeInit = false;
 
+    private void Start()
+    {
+        Debug.Log(_noiseShake);
+    }
+
     void Update()
     {
-        if (_mazeInit || !MazeGeneratorManager.Instance.IsReady) return;
+        if (!MazeGeneratorManager.Instance.IsReady) return;
         if (!_mazeInit)
         {
             _playerMovement = GameObject.FindWithTag("Player").GetComponent<PlayerMovement>();
@@ -44,13 +47,42 @@ public class GameManager : MonoBehaviour
             _virtualCameraNoise = _virtualCamera.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
             _mazeInit = true;
         }
+        ChangeVirtualCameraOrthoSize();
+        ChangeVirtualCameraNoise();
     }
 
-    #region
-    public void ChangeVirtualCameraNoise(float amplitude, float frequency)
+    #region Camera Noise & Size
+    CinemachineVirtualCamera _virtualCamera;
+    CinemachineBasicMultiChannelPerlin _virtualCameraNoise;
+    [SerializeField] NoiseSettings _noiseShake;
+    [SerializeField] NoiseSettings _noiseHandheld;
+
+    private const float _cameraOrthoSpeed = 10f;
+    private const float _cameraAmplitudeSpeed = 15f;
+    private const float _cameraFrequencySpeed = 15f;
+
+    public float CameraOrthoSize = 3f;
+    public float CameraNoiseFrequency;
+    public float CameraNoiseAmplitude;
+
+    public void ChangeVirtualCameraNoiseProfile(string type)
     {
-        _virtualCameraNoise.m_AmplitudeGain = amplitude;
-        _virtualCameraNoise.m_FrequencyGain = frequency;
+        if(type == "shake") _virtualCameraNoise.m_NoiseProfile = _noiseShake;
+        else _virtualCameraNoise.m_NoiseProfile = _noiseHandheld;
+    }
+
+    private void ChangeVirtualCameraOrthoSize()
+    {
+        _virtualCamera.m_Lens.OrthographicSize = 
+            Mathf.Lerp(_virtualCamera.m_Lens.OrthographicSize, CameraOrthoSize, Time.deltaTime * _cameraOrthoSpeed);
+    }
+
+    private void ChangeVirtualCameraNoise()
+    {
+        _virtualCameraNoise.m_AmplitudeGain =
+            Mathf.Lerp(_virtualCameraNoise.m_AmplitudeGain, CameraNoiseAmplitude, Time.deltaTime * _cameraAmplitudeSpeed);
+        _virtualCameraNoise.m_FrequencyGain =
+            Mathf.Lerp(_virtualCameraNoise.m_FrequencyGain, CameraNoiseFrequency, Time.deltaTime * _cameraFrequencySpeed);
     }
     #endregion
 
