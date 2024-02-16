@@ -1,19 +1,24 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 public struct Grid
 {
     public Vector2Int Size;
     public Tile[,] Tiles;
+    public Tile[,] TilesReversed;
     public bool IsReady;
+    public Tile ExitTile;
+    public int Level;
     bool _isCircle;
 
-    public Grid(Vector2Int size, bool isCircle = false)
+    public Grid(Vector2Int size, bool isCircle = false, int level = 0)
     {
         Size = size;
         Tiles = new Tile[Size.x, Size.y];
+        TilesReversed = new Tile[Size.x, Size.y];
         _isCircle = isCircle;
         IsReady = false;
+        ExitTile = new Tile();
+        Level = level;
     }
 
     void InitSquare()
@@ -52,6 +57,20 @@ public struct Grid
         else InitSquare();
     }
 
+    public void ReverseTiles()
+    {
+        int rows = Tiles.GetLength(0);
+        int cols = Tiles.GetLength(1);
+
+        Tile[,] reversedArray = new Tile[rows, cols];
+
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                reversedArray[i, j] = Tiles[rows - 1 - i, cols - 1 - j];
+
+        TilesReversed = reversedArray;
+    }
+
     public void SetTileRegion(Tile tile, int region)
     {
         Tiles[tile.Position.x, tile.Position.y].RegionId = region;
@@ -84,6 +103,11 @@ public struct Grid
     public Tile GetTile(Vector2Int position)
     {
         return Tiles[position.x, position.y];
+    }
+
+    public Tile GetExitTile()
+    {
+        return Tiles[ExitTile.Position.x, ExitTile.Position.y];
     }
 
     public Tile GetNextTile(Tile fromTile, Vector2Int direction, int multiplier)
@@ -133,6 +157,20 @@ public struct Grid
         foreach (var direction in HelperClass.Directions)
         {
             if (!CheckNextTileType(tile, direction, 1, Tile.TileType.Floor))
+                continue;
+            total++;
+        }
+
+        return total;
+    }
+
+    public int GetWallNeighboursNumber(Tile tile)
+    {
+        int total = 0;
+
+        foreach (var direction in HelperClass.Directions)
+        {
+            if (!CheckNextTileType(tile, direction, 1, Tile.TileType.Wall))
                 continue;
             total++;
         }

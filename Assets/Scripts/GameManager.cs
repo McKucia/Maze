@@ -27,13 +27,13 @@ public class GameManager : MonoBehaviour
         get { return _mazeInit; } 
     }
 
+    [HideInInspector] public Transform MainCamera;
     MinimapCamera _minimapCamera;
     PlayerMovement _playerMovement;
     bool _mazeInit = false;
 
     private void Start()
     {
-        Debug.Log(_noiseShake);
     }
 
     void Update()
@@ -43,6 +43,7 @@ public class GameManager : MonoBehaviour
         {
             _playerMovement = GameObject.FindWithTag("Player").GetComponent<PlayerMovement>();
             _minimapCamera = GameObject.FindWithTag("MinimapCamera").GetComponent<MinimapCamera>();
+            MainCamera = GameObject.FindWithTag("MainCamera").transform;
             _virtualCamera = GameObject.FindWithTag("VirtualCamera").GetComponent<CinemachineVirtualCamera>();
             _virtualCameraNoise = _virtualCamera.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
             _mazeInit = true;

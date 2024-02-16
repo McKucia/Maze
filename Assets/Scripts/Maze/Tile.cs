@@ -11,7 +11,8 @@ public struct Tile
         Wall,
         Nothing,
         Border,
-        Carpet
+        Carpet,
+        Exit
     }
 
     public TileType Type;

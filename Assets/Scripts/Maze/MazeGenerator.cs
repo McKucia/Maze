@@ -1,15 +1,15 @@
 using Cinemachine;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Unity.AI.Navigation;
 using UnityEngine;
-using static Tile;
 
 public class MazeGenerator : MonoBehaviour
 {
     [HideInInspector] public Grid Grid;
     [HideInInspector] public bool IsReady;
+    [HideInInspector] public int Level;
 
     readonly MazeGeneratorManager _manager = MazeGeneratorManager.Instance;
 
@@ -17,20 +17,21 @@ public class MazeGenerator : MonoBehaviour
     List<Room> _rooms;
     /// The index of the current region being carved.
     int _currentRegion = -1;
-    int _level;
     System.Random _random;
     GameObject _playerObject;
 
-    public MazeGenerator(int level)
+    void Start()
     {
-        _level = level;
         _random = new System.Random();
-        Grid = new Grid(new Vector2Int(_manager.gridSizeX, _manager.gridSizeY), _manager.isCircle);
+        Grid = new Grid(new Vector2Int(_manager.gridSizeX, _manager.gridSizeY), _manager.isCircle, Level);
 
         _rooms = new List<Room>();
         tileGameObjects = new List<GameObject>();
+    }
 
-        Generate();
+    public void SetActive(bool active)
+    {
+        StartCoroutine(FadeOut());
     }
 
     public async void Generate()
@@ -57,21 +58,22 @@ public class MazeGenerator : MonoBehaviour
                 }
 
             ConnectRegions();
-            AddCarpets();
+            //AddCarpets();
+            Grid.ReverseTiles();
+            AddExit();
             Grid.IsReady = true;
         });
 
         foreach (var t in Grid.Tiles)
             SpawnTile(t);
 
-        if (_level == _manager._currentLevel)
+        if (Level == _manager._currentLevel)
         {
             _manager.surface.BuildNavMesh();
             SpawnPlayer();
             SpawnEnemies();
+            _manager.virtualCamera.GetComponent<CinemachineVirtualCamera>().Follow = _playerObject.transform;
         }
-
-        _manager.virtualCamera.GetComponent<CinemachineVirtualCamera>().Follow = _playerObject.transform;
 
         IsReady = true;
     }
@@ -80,6 +82,12 @@ public class MazeGenerator : MonoBehaviour
     {
         if (tile.Exposed) return;
         Grid.SetTileMinimapObjectActive(tile, true);
+    }
+
+    public void SetFloor(Tile tile)
+    {
+        Debug.Log("set floor for level " + Level + " to " + tile.Position);
+        Grid.SetTileType(tile, Tile.TileType.Floor);
     }
 
     void SpawnPlayer()
@@ -98,6 +106,7 @@ public class MazeGenerator : MonoBehaviour
         {
             var enemyObject = Instantiate(_manager.enemyPrefab, new Vector3(room.Position.x, 0.5f, room.Position.y), Quaternion.identity);
             enemyObject.GetComponent<Enemy>().SetRoom(room);
+            enemyObject.transform.parent = transform;
         }
     }
 
@@ -152,19 +161,22 @@ public class MazeGenerator : MonoBehaviour
         switch (tile.Type)
         {
             case Tile.TileType.Room:
-                newTile = Instantiate(_manager.tileRoomPrefab, new Vector3(tile.Position.x, -_level * 2, tile.Position.y), Quaternion.identity);
+                newTile = Instantiate(_manager.tileRoomPrefab, new Vector3(tile.Position.x, -Level * 2, tile.Position.y), Quaternion.identity);
                 break;
             case Tile.TileType.Wall:
-                newTile = Instantiate(_manager.tileWallPrefab, new Vector3(tile.Position.x, -_level * 2 + .5f, tile.Position.y), Quaternion.identity);
+                newTile = Instantiate(_manager.tileWallPrefab, new Vector3(tile.Position.x, -Level * 2 + .5f, tile.Position.y), Quaternion.identity);
                 break;
             case Tile.TileType.Floor:
-                newTile = Instantiate(_manager.tileFloorPrefab, new Vector3(tile.Position.x, -_level * 2, tile.Position.y), Quaternion.identity);
+                newTile = Instantiate(_manager.tileFloorPrefab, new Vector3(tile.Position.x, -Level * 2, tile.Position.y), Quaternion.identity);
                 break;
             case Tile.TileType.Border:
-                newTile = Instantiate(_manager.tileBorderPrefab, new Vector3(tile.Position.x, -_level * 2 + .5f, tile.Position.y), Quaternion.identity);
+                newTile = Instantiate(_manager.tileBorderPrefab, new Vector3(tile.Position.x, -Level * 2 + .5f, tile.Position.y), Quaternion.identity);
                 break;
             case Tile.TileType.Carpet:
-                newTile = Instantiate(_manager.tileCarpetPrefab, new Vector3(tile.Position.x, -_level * 2, tile.Position.y), Quaternion.identity);
+                newTile = Instantiate(_manager.tileCarpetPrefab, new Vector3(tile.Position.x, -Level * 2, tile.Position.y), Quaternion.identity);
+                break;
+            case Tile.TileType.Exit:
+                newTile = Instantiate(_manager.tileExitPrefab, new Vector3(tile.Position.x, -Level * 2, tile.Position.y), Quaternion.identity);
                 break;
         }
 
@@ -172,6 +184,7 @@ public class MazeGenerator : MonoBehaviour
         {
             tileGameObjects.Add(newTile);
             Grid.SetTileObject(tile, newTile);
+            newTile.transform.parent = transform;
         }
     }
 
@@ -226,6 +239,22 @@ public class MazeGenerator : MonoBehaviour
 
             if (Grid.GetNeighboursNumber(tile) > 2)
                 Grid.SetTileType(tile, Tile.TileType.Carpet);
+        }
+    }
+
+    void AddExit()
+    {
+        foreach (var tile in Grid.Tiles) // TilesReversed
+        {
+            if (tile.Type != Tile.TileType.Floor) continue;
+
+            if (Grid.GetWallNeighboursNumber(tile) > 2)
+            {
+                Grid.SetTileType(tile, Tile.TileType.Exit);
+                Grid.ExitTile = tile;
+                MazeGeneratorManager.Instance.SetNextMazeGeneratorFloor(tile);
+                return;
+            }
         }
     }
 
@@ -296,5 +325,21 @@ public class MazeGenerator : MonoBehaviour
                 (c.ConnectorRegions.Select(r => merged[r]).Count() <= 1)
             );
         };
+    }
+
+    IEnumerator FadeOut()
+    {
+        float elapsedTime = 0f;
+        float fadeSpeed = 12f;
+
+        float targetPosY = transform.position.y + 10f;
+
+        while (targetPosY > transform.position.y)
+        {
+            elapsedTime += Time.deltaTime;
+            transform.position += new Vector3(0, fadeSpeed * Time.deltaTime, 0);
+            yield return null;
+        }
+        gameObject.SetActive(false);
     }
 }

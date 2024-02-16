@@ -1,7 +1,9 @@
+using Palmmedia.ReportGenerator.Core;
 using System;
 using Unity.AI.Navigation;
 using UnityEngine;
 using UnityEngine.AI;
+using static Cinemachine.DocumentationSortingAttribute;
 
 public class MazeGeneratorManager : MonoBehaviour
 {
@@ -11,9 +13,6 @@ public class MazeGeneratorManager : MonoBehaviour
     [Range(1, 10)]
     int _numLevels = 3;
 
-    [SerializeField] 
-    bool _generate;
-
     public bool isCircle = false;
     public GameObject virtualCamera;
     public GameObject tileRoomPrefab;
@@ -21,11 +20,12 @@ public class MazeGeneratorManager : MonoBehaviour
     public GameObject tileWallPrefab;
     public GameObject tileBorderPrefab;
     public GameObject tileCarpetPrefab;
+    public GameObject tileExitPrefab;
     public GameObject playerPrefab;
     public GameObject enemyPrefab;
     public NavMeshSurface surface;
-    [HideInInspector] public int _currentLevel = 0;
-    [HideInInspector] public bool IsReady { get { return _generators[_currentLevel].IsReady; } }
+    public int _currentLevel = 0;
+    [HideInInspector] public bool IsReady { get { return _generators[_numLevels - 1].IsReady; } }
 
     [Range(0, 3)]   public int roomsPadding = 1;
     [Range(0, 3)]   public int roomExtraSize = 0;
@@ -36,6 +36,8 @@ public class MazeGeneratorManager : MonoBehaviour
 
     MazeGenerator[] _generators;
     bool _generateCheck = false;
+    int _currentGeneratingLevel = 0;
+    bool _generate = true;
 
     private void Awake()
     {
@@ -52,28 +54,67 @@ public class MazeGeneratorManager : MonoBehaviour
         int level = 0;
         while (level < _numLevels)
         {
-            MazeGenerator generator = new MazeGenerator(level);
-            _generators[level++] = generator;
+            var generatorObject = new GameObject("Maze Level " + level);
+            generatorObject.AddComponent<MazeGenerator>();
+
+            MazeGenerator mazeGenerator = generatorObject.GetComponent<MazeGenerator>();
+            mazeGenerator.Level = level;
+            _generators[level++] = mazeGenerator;
         }
     }
 
-    void OnValidate()
+    void Update()
     {
-        if (gridSizeX % 2 == 0) gridSizeX++;
-        if (gridSizeY % 2 == 0) gridSizeY++;
-
-        if (_generateCheck != _generate)
+        if (_generate)
         {
-            _generate = _generateCheck;
-
-            foreach (var generator in _generators)
-                generator.Generate();
+            _generators[_currentGeneratingLevel].Generate();
+            _generate = false;
+        }
+        if (_generators[_currentGeneratingLevel].IsReady && _currentGeneratingLevel + 1 < _numLevels)
+        {
+            _currentGeneratingLevel++;
+            _generate = true;
         }
     }
+
+    // void OnValidate()
+    // {
+    //     if (gridSizeX % 2 == 0) gridSizeX++;
+    //     if (gridSizeY % 2 == 0) gridSizeY++;
+    // 
+    //     if (_generateCheck != _generate)
+    //     {
+    //         _generate = _generateCheck;
+    // 
+    //         foreach (var generator in _generators)
+    //             generator.Generate();
+    //     }
+    // }
 
     public Grid GetCurrentGrid()
     {
         return _generators[_currentLevel].Grid;
+    }
+
+    public void IncrementLevel()
+    {
+        _currentLevel++;
+    }
+
+    public void DecrementLevel()
+    {
+        _currentLevel--;
+    }
+
+    public void SetNextMazeGeneratorFloor(Tile tile)
+    {
+        if (_currentGeneratingLevel + 1 >= _numLevels) return;
+        _generators[_currentGeneratingLevel + 1].SetFloor(tile);
+    }
+
+    public void SetCurrentLevelActive(bool active)
+    {
+        _generators[_currentLevel].SetActive(active);
     }
 
     public void DisplayMinimapTile(Tile tile)

@@ -187,7 +187,5 @@ public class Enemy : MonoBehaviour
 
     bool CanHearTarget() { return InRange(_hearRange); }
 
-    bool CanAttackTarget() { return InAngle(_attackAngle) && InRange(_attackRange); }
-
     public void SetRoom(Room room) => _room = room;
 }

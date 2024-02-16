@@ -2,12 +2,14 @@ using Cinemachine;
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] int _moveSpeed = 8;
     [SerializeField] int _chargeSpeed = 14;
     [SerializeField] int _rotationSpeed = 14;
+    [SerializeField] int _fallingSpeed = 6;
     [SerializeField] float _chargeNoiseAmplitude = 0.1f;
     [SerializeField] float _chargeNoiseFrequency = 50f;
     [SerializeField] float _chargeLensOrthoSize = 2f;
@@ -24,6 +26,7 @@ public class PlayerMovement : MonoBehaviour
     bool _isMovingToTarget = false;
     bool _isCharging = false;
     bool _chargeChange = false;
+    bool _isChangingLevel = false;
     bool _init = false;
     Grid _grid;
     Vector2Int _target;
@@ -59,6 +62,16 @@ public class PlayerMovement : MonoBehaviour
 
         HandleInput();
         RotatePlayer();
+        CheckExit();
+
+        if (_isChangingLevel)
+        {
+            if(!_isMovingToTarget)
+            {
+                ChangeLevel();
+                return;
+            }
+        }
         if (!_isMoving)
         {
             if (_currentDirection != Vector2Int.zero)
@@ -74,18 +87,11 @@ public class PlayerMovement : MonoBehaviour
             GetCurrentTile();
             MoveToTarget();
         }
-        if(_isCharging)
-        {
-            _speed = _chargeSpeed;
-        }
-        else
-        {
-            _speed = _moveSpeed;
-        }
-        if(_chargeChange)
-        {
+
+        _speed = _isCharging ? _chargeSpeed : _moveSpeed;
+
+        if (_chargeChange)
             SetVirtualCameraNoise();
-        }
     }
 
     void HandleInput()
@@ -114,6 +120,7 @@ public class PlayerMovement : MonoBehaviour
         Vector3 newDirection = Vector3.RotateTowards(_playerModel.forward, targetDirection, singleStep, 0.0f);
         _playerModel.rotation = Quaternion.LookRotation(newDirection);
     }
+
 
     public void UpdateKeys()
     {
@@ -146,6 +153,47 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    void ChangeLevel()
+    {
+        float targetLevelY = _grid.Level * -2f + 0.5f;
+
+        transform.position -= new Vector3(0, Time.deltaTime * _fallingSpeed, 0);
+
+        if (targetLevelY >= transform.position.y)
+        {
+            var pos = transform.position;
+            pos.y = targetLevelY;
+            transform.position = pos;
+            _isChangingLevel = false;
+        }
+    }
+
+    void CheckExit()
+    {
+        bool isClose;
+        if (Distance2D(_grid.ExitTile.Position) <= 1f &&
+            Angle2D(_grid.ExitTile.Position) <= 20f)
+        {
+            isClose = true;
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                _target = _grid.GetExitTile().Position;
+                MazeGeneratorManager.Instance.SetCurrentLevelActive(false);
+                MazeGeneratorManager.Instance.IncrementLevel();
+                _grid = MazeGeneratorManager.Instance.GetCurrentGrid();
+                _isChangingLevel = true;
+                _isMovingToTarget = true;
+            }
+        }
+        else
+            isClose = false;
+
+        _grid.GetExitTile()
+            .tileObject
+            .GetComponent<ExitTile>()
+            .ShowHideInteractionHint(isClose);
+    }
+
     void Move()
     {
         var nextTile = _grid.GetNextTile(_currentTile, _currentDirection, 1);
@@ -172,7 +220,7 @@ public class PlayerMovement : MonoBehaviour
             }
         }
 
-        if (nextTile.Type == Tile.TileType.Wall &&
+        if ((nextTile.Type == Tile.TileType.Wall || nextTile.Type == Tile.TileType.Exit) &&
             Distance2D(nextTile.Position) <= 1f)
         {
             _currentDirection = Vector2Int.zero;
@@ -188,6 +236,12 @@ public class PlayerMovement : MonoBehaviour
     float Distance2D(Vector2Int to)
     {
         return Vector2.Distance(new Vector2(transform.position.x, transform.position.z), to);
+    }
+
+    float Angle2D(Vector2Int to)
+    {
+        Vector2 toTarget = to - new Vector2(_playerModel.position.x, _playerModel.position.z);
+        return Vector2.Angle(new Vector2(_playerModel.forward.x, _playerModel.forward.z), toTarget);
     }
 
     void MoveToTarget()
@@ -218,7 +272,7 @@ public class PlayerMovement : MonoBehaviour
         _currentPosition = new Vector2Int(positionX, positionY);
         _currentTile = _grid.GetTile(_currentPosition);
 
-        if (!_currentTile.Exposed)
+        if (!_currentTile.Exposed && _currentTile.Type != Tile.TileType.Wall)
             MazeGeneratorManager.Instance.DisplayMinimapTile(_currentTile);
     }
 

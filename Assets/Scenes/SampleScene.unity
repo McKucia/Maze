@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.44657826, g: 0.49641263, b: 0.57481676, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -242,7 +242,6 @@ GameObject:
   m_Component:
   - component: {fileID: 705507995}
   - component: {fileID: 705507994}
-  - component: {fileID: 705507996}
   m_Layer: 0
   m_Name: Directional Light
   m_TagString: Untagged
@@ -327,18 +326,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
---- !u!114 &705507996
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 705507993}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &740726324
 GameObject:
   m_ObjectHideFlags: 0
@@ -732,7 +719,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
-  m_AdditionalShaderChannelsFlag: 25
+  m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
@@ -920,6 +907,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d995acc689b72c14788ff0fb0c21b455, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  MainCamera: {fileID: 0}
   _noiseShake: {fileID: 11400000, guid: 837bcfca4d332504fae8ce1c7de24f29, type: 2}
   _noiseHandheld: {fileID: 11400000, guid: 1ddae6ba3c424e748b1653937c78dae9, type: 2}
   CameraOrthoSize: 3
@@ -1279,8 +1267,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb7c5b08aaf424447bbb1d9230e78ac7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _numLevels: 1
-  _generate: 0
+  _numLevels: 3
   isCircle: 0
   virtualCamera: {fileID: 856879944}
   tileRoomPrefab: {fileID: 6351245391770879047, guid: 5e2a299c0d20eb44eb1d617854608b9f, type: 3}
@@ -1288,13 +1275,14 @@ MonoBehaviour:
   tileWallPrefab: {fileID: 1953077224627339679, guid: d2ee0fd4090565244894667b5adbe6b4, type: 3}
   tileBorderPrefab: {fileID: 1953077224627339679, guid: 5d550660ba81f0443be706b959b3b432, type: 3}
   tileCarpetPrefab: {fileID: 6351245391770879047, guid: b5bad05d0982a1148884f8e4c0506ac8, type: 3}
+  tileExitPrefab: {fileID: 6351245391770879047, guid: 99ebe07b35f30d54fb855e78c556db44, type: 3}
   playerPrefab: {fileID: 1953077224627339679, guid: 5d550660ba81f0443be706b959b3b432, type: 3}
   enemyPrefab: {fileID: 4810338095501571988, guid: c35070ed503dfd245911ac77ed1fcd64, type: 3}
   surface: {fileID: 1368981488}
   _currentLevel: 0
   roomsPadding: 1
   roomExtraSize: 0
-  windingPercent: 60
+  windingPercent: 100
   numRoomTries: 50
   gridSizeX: 41
   gridSizeY: 41
