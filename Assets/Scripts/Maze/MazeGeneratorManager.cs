@@ -1,6 +1,7 @@
 using Palmmedia.ReportGenerator.Core;
 using System;
 using Unity.AI.Navigation;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 using static Cinemachine.DocumentationSortingAttribute;
@@ -98,12 +99,16 @@ public class MazeGeneratorManager : MonoBehaviour
 
     public void IncrementLevel()
     {
+        _generators[_currentLevel].SetActive(false);
         _currentLevel++;
+        _generators[_currentLevel].SetActive(true);
     }
 
     public void DecrementLevel()
     {
+        _generators[_currentLevel].SetActive(true);
         _currentLevel--;
+        _generators[_currentLevel].SetActive(false);
     }
 
     public void SetNextMazeGeneratorFloor(Tile tile)
@@ -112,13 +117,9 @@ public class MazeGeneratorManager : MonoBehaviour
         _generators[_currentGeneratingLevel + 1].SetFloor(tile);
     }
 
-    public void SetCurrentLevelActive(bool active)
-    {
-        _generators[_currentLevel].SetActive(active);
-    }
-
     public void DisplayMinimapTile(Tile tile)
     {
-        _generators[_currentLevel].DisplayMinimapTile(tile);
+        if(_generators[_currentLevel].gameObject.activeSelf == true)
+            _generators[_currentLevel].DisplayMinimapTile(tile);
     }
 }

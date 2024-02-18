@@ -437,7 +437,7 @@ MonoBehaviour:
   m_Follow: {fileID: 0}
   m_Lens:
     FieldOfView: 60
-    OrthographicSize: 3
+    OrthographicSize: 2
     NearClipPlane: 0.3
     FarClipPlane: 1000
     Dutch: 0
@@ -482,8 +482,6 @@ GameObject:
   - component: {fileID: 963194227}
   - component: {fileID: 963194226}
   - component: {fileID: 963194229}
-  - component: {fileID: 963194230}
-  - component: {fileID: 963194231}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -534,7 +532,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 3
+  orthographic size: 2
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -599,49 +597,6 @@ MonoBehaviour:
   m_CameraActivatedEvent:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &963194230
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 963194225}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 48690ec58fb591c44b5968d209bb519d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  kuwaharaShader: {fileID: 4800000, guid: 1c7634a2e02bda64a9225bba8e93f537, type: 3}
-  kernelSize: 10
-  sharpness: 5.14
-  hardness: 1
-  alpha: 2
-  zeroCrossing: 0.68
-  useZeta: 0
-  zeta: 0.26
-  passes: 1
---- !u!114 &963194231
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 963194225}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ba9246a3d1066d94f93406056fbcc92f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  differenceOfGaussians: {fileID: 4800000, guid: 652077ba28fcf7c4e88e0335a8984fe2, type: 3}
-  gaussianKernelSize: 5
-  stdev: 2
-  stdevScale: 1.6
-  tau: 1
-  thresholding: 1
-  tanh: 0
-  phi: 1
-  threshold: 0.005
-  invert: 0
 --- !u!1 &1067451685
 GameObject:
   m_ObjectHideFlags: 0
@@ -910,7 +865,7 @@ MonoBehaviour:
   MainCamera: {fileID: 0}
   _noiseShake: {fileID: 11400000, guid: 837bcfca4d332504fae8ce1c7de24f29, type: 2}
   _noiseHandheld: {fileID: 11400000, guid: 1ddae6ba3c424e748b1653937c78dae9, type: 2}
-  CameraOrthoSize: 3
+  CameraOrthoSize: 2
   CameraNoiseFrequency: 0.2
   CameraNoiseAmplitude: 0.7
   CameraPointing: 0
@@ -1202,7 +1157,7 @@ Transform:
   m_GameObject: {fileID: 1804329947}
   serializedVersion: 2
   m_LocalRotation: {x: 0.35355338, y: 0.35355338, z: -0.1464466, w: 0.8535535}
-  m_LocalPosition: {x: -10, y: 43, z: -10}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1273,7 +1228,7 @@ MonoBehaviour:
   tileRoomPrefab: {fileID: 6351245391770879047, guid: 5e2a299c0d20eb44eb1d617854608b9f, type: 3}
   tileFloorPrefab: {fileID: 6351245391770879047, guid: 2f5c3b98b705bd643a853cf9c47f9753, type: 3}
   tileWallPrefab: {fileID: 1953077224627339679, guid: d2ee0fd4090565244894667b5adbe6b4, type: 3}
-  tileBorderPrefab: {fileID: 1953077224627339679, guid: 5d550660ba81f0443be706b959b3b432, type: 3}
+  tileBorderPrefab: {fileID: 2683816890052587964, guid: 83f9d3f5c82e86e45b8dc6201f5fb10f, type: 3}
   tileCarpetPrefab: {fileID: 6351245391770879047, guid: b5bad05d0982a1148884f8e4c0506ac8, type: 3}
   tileExitPrefab: {fileID: 6351245391770879047, guid: 99ebe07b35f30d54fb855e78c556db44, type: 3}
   playerPrefab: {fileID: 1953077224627339679, guid: 5d550660ba81f0443be706b959b3b432, type: 3}

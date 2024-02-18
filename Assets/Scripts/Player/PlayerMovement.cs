@@ -178,9 +178,6 @@ public class PlayerMovement : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.R))
             {
                 _target = _grid.GetExitTile().Position;
-                MazeGeneratorManager.Instance.SetCurrentLevelActive(false);
-                MazeGeneratorManager.Instance.IncrementLevel();
-                _grid = MazeGeneratorManager.Instance.GetCurrentGrid();
                 _isChangingLevel = true;
                 _isMovingToTarget = true;
             }
@@ -256,6 +253,12 @@ public class PlayerMovement : MonoBehaviour
             _currentPosition = _target;
             _currentDirection = Vector2Int.zero;
             transform.position = new Vector3(_currentTile.Position.x, transform.position.y, _currentTile.Position.y);
+
+            if (_isChangingLevel)
+            {
+                MazeGeneratorManager.Instance.IncrementLevel();
+                _grid = MazeGeneratorManager.Instance.GetCurrentGrid();
+            }
         }
     }
 

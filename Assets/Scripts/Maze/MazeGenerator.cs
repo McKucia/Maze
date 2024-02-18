@@ -31,7 +31,8 @@ public class MazeGenerator : MonoBehaviour
 
     public void SetActive(bool active)
     {
-        StartCoroutine(FadeOut());
+        if (active) gameObject.SetActive(true);
+        StartCoroutine(FadeUp(active));
     }
 
     public async void Generate()
@@ -74,6 +75,11 @@ public class MazeGenerator : MonoBehaviour
             SpawnEnemies();
             _manager.virtualCamera.GetComponent<CinemachineVirtualCamera>().Follow = _playerObject.transform;
         }
+        else
+        {
+            transform.Translate(Vector3.down * 10f);
+            gameObject.SetActive(false);
+        }
 
         IsReady = true;
     }
@@ -86,7 +92,6 @@ public class MazeGenerator : MonoBehaviour
 
     public void SetFloor(Tile tile)
     {
-        Debug.Log("set floor for level " + Level + " to " + tile.Position);
         Grid.SetTileType(tile, Tile.TileType.Floor);
     }
 
@@ -164,7 +169,7 @@ public class MazeGenerator : MonoBehaviour
                 newTile = Instantiate(_manager.tileRoomPrefab, new Vector3(tile.Position.x, -Level * 2, tile.Position.y), Quaternion.identity);
                 break;
             case Tile.TileType.Wall:
-                newTile = Instantiate(_manager.tileWallPrefab, new Vector3(tile.Position.x, -Level * 2 + .5f, tile.Position.y), Quaternion.identity);
+                newTile = Instantiate(_manager.tileWallPrefab, new Vector3(tile.Position.x, -Level * 2 + .25f, tile.Position.y), Quaternion.identity);
                 break;
             case Tile.TileType.Floor:
                 newTile = Instantiate(_manager.tileFloorPrefab, new Vector3(tile.Position.x, -Level * 2, tile.Position.y), Quaternion.identity);
@@ -327,10 +332,10 @@ public class MazeGenerator : MonoBehaviour
         };
     }
 
-    IEnumerator FadeOut()
+    IEnumerator FadeUp(bool active)
     {
         float elapsedTime = 0f;
-        float fadeSpeed = 12f;
+        float fadeSpeed = 7f;
 
         float targetPosY = transform.position.y + 10f;
 
@@ -340,6 +345,6 @@ public class MazeGenerator : MonoBehaviour
             transform.position += new Vector3(0, fadeSpeed * Time.deltaTime, 0);
             yield return null;
         }
-        gameObject.SetActive(false);
+        if (!active) gameObject.SetActive(false);
     }
 }
