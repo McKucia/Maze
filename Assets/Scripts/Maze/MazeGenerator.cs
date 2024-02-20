@@ -1,4 +1,5 @@
 using Cinemachine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +20,8 @@ public class MazeGenerator : MonoBehaviour
     int _currentRegion = -1;
     System.Random _random;
     GameObject _playerObject;
+    int _numSpawnCoroutines = 0;
+    int _numFinishedSpawnCoroutines = 0;
 
     void Start()
     {
@@ -65,23 +68,7 @@ public class MazeGenerator : MonoBehaviour
             Grid.IsReady = true;
         });
 
-        foreach (var t in Grid.Tiles)
-            SpawnTile(t);
-
-        if (Level == _manager._currentLevel)
-        {
-            _manager.surface.BuildNavMesh();
-            SpawnPlayer();
-            SpawnEnemies();
-            _manager.virtualCamera.GetComponent<CinemachineVirtualCamera>().Follow = _playerObject.transform;
-        }
-        else
-        {
-            transform.Translate(Vector3.down * 10f);
-            gameObject.SetActive(false);
-        }
-
-        IsReady = true;
+        SpawnTiles();
     }
 
     public void DisplayMinimapTile(Tile tile)
@@ -159,6 +146,35 @@ public class MazeGenerator : MonoBehaviour
         return true;
     }
 
+    void SpawnTiles()
+    {
+        int i = 0, total = 0;
+
+        foreach(var tile in Grid.Tiles)
+        {
+            total++; i++;
+            if (i == 100 || total + 1 >= Grid.Tiles.Length)
+            {
+                StartCoroutine(SpawnTiles(i, total));
+                _numSpawnCoroutines++;
+                i = 0;
+            }
+        }
+    }
+
+    IEnumerator SpawnTiles(int howMany, int rightBound)
+    {
+        for(int i = rightBound - howMany; i < rightBound; i++)
+        {
+            SpawnTile(Grid.Tiles[i / Grid.Size.x, i % Grid.Size.y]);
+            yield return null;
+        }
+
+        _numFinishedSpawnCoroutines++;
+        if(_numFinishedSpawnCoroutines == _numSpawnCoroutines)
+            ResumeGeneration();
+    }
+
     void SpawnTile(Tile tile)
     {
         GameObject newTile = null;
@@ -166,22 +182,22 @@ public class MazeGenerator : MonoBehaviour
         switch (tile.Type)
         {
             case Tile.TileType.Room:
-                newTile = Instantiate(_manager.tileRoomPrefab, new Vector3(tile.Position.x, -Level * 2, tile.Position.y), Quaternion.identity);
+                newTile = Instantiate(_manager.tileRoomPrefab, new Vector3(tile.Position.x, -Level * 2 + 100, tile.Position.y), Quaternion.identity);
                 break;
             case Tile.TileType.Wall:
-                newTile = Instantiate(_manager.tileWallPrefab, new Vector3(tile.Position.x, -Level * 2 + .25f, tile.Position.y), Quaternion.identity);
+                newTile = Instantiate(_manager.tileWallPrefab, new Vector3(tile.Position.x, -Level * 2 + .25f + 100, tile.Position.y), Quaternion.identity);
                 break;
             case Tile.TileType.Floor:
-                newTile = Instantiate(_manager.tileFloorPrefab, new Vector3(tile.Position.x, -Level * 2, tile.Position.y), Quaternion.identity);
+                newTile = Instantiate(_manager.tileFloorPrefab, new Vector3(tile.Position.x, -Level * 2 + 100, tile.Position.y), Quaternion.identity);
                 break;
             case Tile.TileType.Border:
-                newTile = Instantiate(_manager.tileBorderPrefab, new Vector3(tile.Position.x, -Level * 2 + .5f, tile.Position.y), Quaternion.identity);
+                newTile = Instantiate(_manager.tileBorderPrefab, new Vector3(tile.Position.x, -Level * 2 + .5f + 100, tile.Position.y), Quaternion.identity);
                 break;
             case Tile.TileType.Carpet:
-                newTile = Instantiate(_manager.tileCarpetPrefab, new Vector3(tile.Position.x, -Level * 2, tile.Position.y), Quaternion.identity);
+                newTile = Instantiate(_manager.tileCarpetPrefab, new Vector3(tile.Position.x, -Level * 2 + 100 , tile.Position.y), Quaternion.identity);
                 break;
             case Tile.TileType.Exit:
-                newTile = Instantiate(_manager.tileExitPrefab, new Vector3(tile.Position.x, -Level * 2, tile.Position.y), Quaternion.identity);
+                newTile = Instantiate(_manager.tileExitPrefab, new Vector3(tile.Position.x, -Level * 2 + 100, tile.Position.y), Quaternion.identity);
                 break;
         }
 
@@ -191,6 +207,24 @@ public class MazeGenerator : MonoBehaviour
             Grid.SetTileObject(tile, newTile);
             newTile.transform.parent = transform;
         }
+    }
+
+    void ResumeGeneration()
+    {
+        transform.position = new Vector3(0, 0, 0);
+        if (Level == _manager._currentLevel)
+        {
+            _manager.surface.BuildNavMesh();
+            SpawnPlayer();
+            SpawnEnemies();
+            _manager.virtualCamera.GetComponent<CinemachineVirtualCamera>().Follow = _playerObject.transform;
+        }
+        else
+        {
+            transform.Translate(Vector3.down * 10f);
+            gameObject.SetActive(false);
+        }
+        IsReady = true;
     }
 
     // Growing Tree
@@ -306,7 +340,7 @@ public class MazeGenerator : MonoBehaviour
             openRegions.Add(i);
         }
 
-        while (openRegions.Count > 0)
+        while (openRegions.Count > 0 && connectors.Count > 0)
         {
             var connector = connectors[_random.Next(0, connectors.Count)];
             Grid.Carve(connector, connector.RegionId);

@@ -1222,7 +1222,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb7c5b08aaf424447bbb1d9230e78ac7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _numLevels: 3
   isCircle: 0
   virtualCamera: {fileID: 856879944}
   tileRoomPrefab: {fileID: 6351245391770879047, guid: 5e2a299c0d20eb44eb1d617854608b9f, type: 3}

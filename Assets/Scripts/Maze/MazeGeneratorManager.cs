@@ -1,5 +1,6 @@
 using Palmmedia.ReportGenerator.Core;
 using System;
+using System.Collections.Generic;
 using Unity.AI.Navigation;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -9,10 +10,6 @@ using static Cinemachine.DocumentationSortingAttribute;
 public class MazeGeneratorManager : MonoBehaviour
 {
     public static MazeGeneratorManager Instance { get; private set; }
-
-    [SerializeField]
-    [Range(1, 10)]
-    int _numLevels = 3;
 
     public bool isCircle = false;
     public GameObject virtualCamera;
@@ -35,10 +32,11 @@ public class MazeGeneratorManager : MonoBehaviour
     [Range(21, 81)] public int gridSizeX = 41;
     [Range(21, 81)] public int gridSizeY = 41;
 
-    MazeGenerator[] _generators;
+    List<MazeGenerator> _generators;
     bool _generateCheck = false;
     int _currentGeneratingLevel = 0;
     bool _generate = true;
+    int _numLevels = 0;
 
     private void Awake()
     {
@@ -50,18 +48,10 @@ public class MazeGeneratorManager : MonoBehaviour
 
     void Start()
     {
-        _generators = new MazeGenerator[_numLevels];
+        _generators = new List<MazeGenerator>();
 
-        int level = 0;
-        while (level < _numLevels)
-        {
-            var generatorObject = new GameObject("Maze Level " + level);
-            generatorObject.AddComponent<MazeGenerator>();
-
-            MazeGenerator mazeGenerator = generatorObject.GetComponent<MazeGenerator>();
-            mazeGenerator.Level = level;
-            _generators[level++] = mazeGenerator;
-        }
+        for (int i = 0; i < 2; i++)
+            AddLevel();
     }
 
     void Update()
@@ -92,6 +82,19 @@ public class MazeGeneratorManager : MonoBehaviour
     //     }
     // }
 
+    void AddLevel()
+    {
+        var generatorObject = new GameObject("Maze Level " + _numLevels);
+        generatorObject.AddComponent<MazeGenerator>();
+        generatorObject.transform.Translate(0, 100, 0);
+
+        MazeGenerator mazeGenerator = generatorObject.GetComponent<MazeGenerator>();
+        mazeGenerator.Level = _numLevels;
+        _generators.Add(mazeGenerator);
+
+        _numLevels++;
+    }
+
     public Grid GetCurrentGrid()
     {
         return _generators[_currentLevel].Grid;
@@ -102,6 +105,7 @@ public class MazeGeneratorManager : MonoBehaviour
         _generators[_currentLevel].SetActive(false);
         _currentLevel++;
         _generators[_currentLevel].SetActive(true);
+        AddLevel();
     }
 
     public void DecrementLevel()
